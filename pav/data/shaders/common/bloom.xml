@@ -1,0 +1,13 @@
+<filter name="Bloom effect">
+    <description>Adds a bloom effect by increasing the intensity of bright colors</description>
+    <fragment>bloom.glsl</fragment>
+    <textures input="1" output="1">
+        <intexture type="sampler2d" name="tex" label="input image">0</intexture>
+    </textures>
+    <parameters>
+        <parameter type="float" name="T1" label="The low intensity threshold">1.0</parameter>
+        <parameter type="float" name="T2" label="The high intensity threshold">1.5</parameter>
+        <parameter type="float" name="Intensity" label="The bloom intensity">0.25</parameter>
+        <parameter type="vec4" name="LumaCoeffs" label="Coefficients to use when calculating the color intensity">0.5 0.5 0.5 1.0</parameter>
+    </parameters>
+</filter>

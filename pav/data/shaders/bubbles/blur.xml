@@ -1,0 +1,11 @@
+<filter name="Bubble blur">
+    <description>Blur filter used in the Bubbles visualizer</description>
+    <fragment>blur.glsl</fragment>
+    <textures input="2" output="1">
+        <intexture type="sampler2d" name="Tex" offset="Offset" label="Input image">0</intexture>
+        <intexture type="sampler2d" name="Age" label="Age texture">1</intexture>
+    </textures>
+    <parameters>
+        <parameter type="float" name="DarkenFactor" label="Darken factor. set to 0.0 to disable">0.0</parameter>
+    </parameters>
+</filter>

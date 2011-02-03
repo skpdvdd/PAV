@@ -1,0 +1,11 @@
+<filter name="Bubble age update">
+    <description>Updates the bubble age texture</description>
+    <fragment>ageupdate.glsl</fragment>
+    <textures input="2" output="1">
+        <intexture type="sampler2d" name="Age" label="The age texture">0</intexture>
+        <intexture type="sampler2d" name="New" label="The texture holding the new bubbles">1</intexture>                      
+    </textures>
+    <parameters>
+		<parameter type="float" name="Add" label="The value to add.">0.01f</parameter>
+    </parameters>
+</filter>
