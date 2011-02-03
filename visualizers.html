@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>Processing Audio Visualization (PAV)</title>
+		<link rel="stylesheet" media="all" href="style.css" />
+	</head>
+	<body>
+		<div id="main">
+			<div class="content" style="padding-top: 160px;">
+				<h1>Processing Audio Visualization - Visualizers</h1>
+				<p>In PAV, music is visualized via so called Visualizers. A visualization can consist of many Visualizers, all working independently from each other (more information is available on the <a href="index.html">home page</a>). The current version contains 8 visualizers, which are introduced here. The images show the Visualizers in their default configuration, that is as they are configured when they are added to the visualization.</p>
+				
+				<h2>Waveform</h2>
+				Waveform is a simple Visualizer that visualizes the incoming audio signal by drawing time (horizontal axis) versus signal intensity (vertical axis). Type <span class="code">add waveform</span> in the PAV window and hit enter to add.
+				<img class="v" src="img/waveform.png" />
+				<h2>Spectrum</h2>
+				Spectrum visualizes the frequencies that comprise the incoming audio signal. The horizontal axis is the frequency, with the vertical axis being the intensity of the frequency band. Type <span class="code">add spectrum</span> to add.
+				<img class="v" src="img/spectrum.png" />
+				<h3>Spectogram</h3>
+				This Visualizer visualizes the temporal change of the frequency distribution of the audio signal (see <a href="http://en.wikipedia.org/wiki/Spectrogram" target="_blank">Wikipedia</a>). Type <span class="code">add spectogram</span> to add. Note that this Visualizer is rather slow with software rendering enabled.
+				<img class="v" src="img/spectogram.png" />
+				<h3>Rainbow</h3>
+				Rainbow draws bright color stripes based on the brightness of the sound. type <span class="code">add rainbow</span> to add. Note that this Visualizer is rather slow with software rendering enabled.
+				<img class="v" src="img/rainbow.png" />
+				<h3>Phasor</h3>
+				Phasor draws the intensity of the incoming audio data (vertical axis) versus its rate of change (first derivative, horizontal axis). This creates a morphing whirl. Phasor works well with classical music. Type <span class="code">add phasor</span> to add.
+				<img class="v" src="img/phasor.png" />
+				<h3>Mel Spectrum</h3>
+				The Mel Spectrum Visualizer visualizes the frequency distribution of the audio data as a Mel spectrum (see <a href="http://en.wikipedia.org/wiki/Mel_scale" target="_blank">Wikipedia</a>). Type <span class="code">add melspectrum</span> to add.
+				<img class="v" src="img/melspectrum.png" />
+				<h3>Boxes</h3>
+				Boxes draws boxes that change their height depending on frequencies of the incoming audio data. This resembles a three dimensional Mel spectrum. Type <span class="code">add boxes</span> to add. This Visualizer requires OpenGL mode (see <a href="index.html">home page</a>).
+				<img class="v" src="img/boxes.png" />
+				<h3>Bubbles</h3>
+				This visualization spawns Bubbles at a rate based on the intensity of the incoming audio data. The position of the bubbles is chosen randomly, while rate and size depend on sound intensity. Type <span class="code">add bubbles</span> to add. This Visualizer requires OpenGL mode (see <a href="index.html">home page</a>). Note that this visualizer uses advanced GPU features, which can cause problems on some systems.
+				<img class="v" src="img/bubbles.png" />
+				
+				<div id="copyright">Processing Audio Visualization (PAV)<br> Copyright (C) 2011  Christopher Pramerdorfer</div>
+			</div>
+		</div>
+	</body>
+</html> 
