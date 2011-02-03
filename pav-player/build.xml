@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project name="pav-player" basedir="." default="run">
+	<property name="src.dir" value="src"/>
+	<property name="build.dir" value="build"/>
+	<property name="lib.dir" value="lib"/>
+	<property name="classes.dir" value="${build.dir}/classes"/>
+	<property name="jar.dir" value="${build.dir}/jar"/>
+	<property name="main-class" value="pav.player.Main"/>
+	
+	<path id="classpath">
+		<fileset dir="${lib.dir}" includes="**/*.jar"/>
+	</path>
+
+    <target name="clean">
+        <delete dir="${build.dir}"/>
+    </target>
+
+    <target name="compile">
+        <mkdir dir="${classes.dir}"/>
+        <javac srcdir="${src.dir}" destdir="${classes.dir}" classpathref="classpath" includeantruntime="false"/>
+    </target>
+
+    <target name="jar" depends="compile">
+        <mkdir dir="${jar.dir}"/>
+		<jar destfile="${jar.dir}/${ant.project.name}.jar" basedir="${classes.dir}"/>
+    </target>
+    
+    <target name="run" depends="jar">
+    	<java fork="true" classname="${main-class}">
+    		<classpath>
+    			<path refid="classpath"/>
+    			<path location="${jar.dir}/${ant.project.name}.jar"/>
+    		</classpath>
+    		<arg value="-pavhost=localhost"/> <!-- the host PAV runs on -->
+			<arg value="-pavport=2198"/> <!-- the port PAV runs on -->
+    		<arg value="-framesize=1024"/> <!-- the size of the audio frames -->
+    		<arg value="-renderer=processing.core.PGraphicsJava2D"/> <!-- the Processing renderer to use -->
+    		<arg value="-width=400"/> <!-- the player width -->
+    		<arg value="-height=300"/> <!-- the player height -->
+    		<arg value="-resizable"/> <!-- make the player resizable -->
+    	</java>
+    </target>
+	
+	<target name="run-nopav" depends="jar">
+    	<java fork="true" classname="${main-class}">
+    		<classpath>
+    			<path refid="classpath"/>
+    			<path location="${jar.dir}/${ant.project.name}.jar"/>
+    		</classpath>
+    	 	<arg value="-nopav"/> <!-- do not send audio data to PAV -->
+    	</java>
+	</target>
+</project>
