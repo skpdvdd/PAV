@@ -34,8 +34,9 @@ public interface Visualizer extends Serializable
 	 * Sets the PApplet to draw to. Must be called before process().
 	 * 
 	 * @param applet Where to draw to. Must not be null
+	 * @throws PAVException If the visualizer does not work with this applet
 	 */
-	void drawTo(PApplet applet);
+	void drawTo(PApplet applet) throws PAVException;
 	
 	/**
 	 * Sets the area that can be used by this visualizer. If relative is set to false
@@ -93,4 +94,10 @@ public interface Visualizer extends Serializable
 	 * @return visualizer info
 	 */
 	String toString();
+	
+	/**
+	 * Disposes this visualizer, releasing all resources that were used exclusively
+	 * by this visualiter. Subsequent calls to any methods of the visualizer might cause exceptions.
+	 */
+	void dispose();
 }

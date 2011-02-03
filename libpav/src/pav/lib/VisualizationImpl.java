@@ -57,9 +57,10 @@ public class VisualizationImpl implements Visualization
 	 * This method automatically tells the visualizer to draw to the applet of this visualization.
 	 * 
 	 * @param visualizer The visualizer to add. Must not be null
+	 * @throws PAVException If an error occured while adding the visualizer
 	 */
 	@Override
-	public void addVisualizer(Visualizer visualizer)
+	public void addVisualizer(Visualizer visualizer) throws PAVException
 	{
 		int level = 0;
 		
@@ -77,9 +78,10 @@ public class VisualizationImpl implements Visualization
 	 * 
 	 * @param visualizer The visualizer to add. Must not be null
 	 * @param name The name of the visualizer. Must be unique
+	 * @throws PAVException If an error occured while adding the visualizer
 	 */
 	@Override
-	public void addVisualizer(Visualizer visualizer, String name)
+	public void addVisualizer(Visualizer visualizer, String name) throws PAVException
 	{
 		int level = 0;
 		
@@ -99,9 +101,10 @@ public class VisualizationImpl implements Visualization
 	 * 
 	 * @param visualizer The visualizer to add. Must not be null
 	 * @param level The level
+	 * @throws PAVException If an error occured while adding the visualizer
 	 */
 	@Override
-	public void addVisualizer(Visualizer visualizer, int level)
+	public void addVisualizer(Visualizer visualizer, int level) throws PAVException
 	{
 		addVisualizer(visualizer, level, visualizer + " [" + level + "]");
 	}
@@ -115,9 +118,10 @@ public class VisualizationImpl implements Visualization
 	 * @param visualizer The visualizer to add. Must not be null
 	 * @param level The level
 	 * @param name The name of the visualizer. Must be unique
+	 * @throws PAVException If an error occured while adding the visualizer
 	 */
 	@Override
-	public void addVisualizer(Visualizer visualizer, int level, String name)
+	public void addVisualizer(Visualizer visualizer, int level, String name) throws PAVException
 	{
 		visualizer.drawTo(_p);
 		
@@ -175,7 +179,13 @@ public class VisualizationImpl implements Visualization
 	@Override
 	public Map<Integer, Visualizer> getVisualizers()
 	{
-		return new HashMap<Integer, Visualizer>(_visualizers);
+		return _visualizers;
+	}
+	
+	@Override
+	public int numVisualizers()
+	{
+		return _visualizers.size();
 	}
 	
 	@Override

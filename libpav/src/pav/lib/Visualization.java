@@ -33,16 +33,18 @@ public interface Visualization
 	 * Adds a new visualizer. The new visualizer will be drawn last.
 	 * 
 	 * @param visualizer The visualizer to add. Must not be null
+	 * @throws PAVException If an error occured while adding the visualizer
 	 */
-	void addVisualizer(Visualizer visualizer);
+	void addVisualizer(Visualizer visualizer) throws PAVException;
 	
 	/**
 	 * Adds a new visualizer. The new visualizer will be drawn last.
 	 * 
 	 * @param visualizer The visualizer to add. Must not be null
 	 * @param name The name of the visualizer. Must be unique
+	 * @throws PAVException If an error occured while adding the visualizer
 	 */
-	void addVisualizer(Visualizer visualizer, String name);
+	void addVisualizer(Visualizer visualizer, String name) throws PAVException;
 	
 	/**
 	 * Adds a new visualizer with a given level. The level specifies then the visualizer
@@ -51,8 +53,9 @@ public interface Visualization
 	 * 
 	 * @param visualizer The visualizer to add. Must not be null
 	 * @param level The level
+	 * @throws PAVException If an error occured while adding the visualizer
 	 */
-	void addVisualizer(Visualizer visualizer, int level);
+	void addVisualizer(Visualizer visualizer, int level) throws PAVException;
 	
 	/**
 	 * Adds a new visualizer with a given level. The level specifies then the visualizer
@@ -62,8 +65,9 @@ public interface Visualization
 	 * @param visualizer The visualizer to add. Must not be null
 	 * @param level The level
 	 * @param name The name of the visualizer. Must be unique
+	 * @throws PAVException If an error occured while adding the visualizer
 	 */
-	void addVisualizer(Visualizer visualizer, int level, String name);
+	void addVisualizer(Visualizer visualizer, int level, String name) throws PAVException;
 	
 	/**
 	 * Removes a visualizer. Does nothing if the visualizer does not exist.
@@ -106,11 +110,18 @@ public interface Visualization
 	/**
 	 * Gets all visualizers that are currently part of this visualization along
 	 * with their associated level. The Map is be sorted, the visualizer with the
-	 * lowest level is the first item in the list.
+	 * lowest level is the first item in the list. The returned map must not be modified.
 	 * 
 	 * @return A map containing all visualizers
 	 */
 	Map<Integer, Visualizer> getVisualizers();
+	
+	/**
+	 * Returns the number of visualizers this visualization contains.
+	 * 
+	 * @return Number of visualizers
+	 */
+	int numVisualizers();
 	
 	/**
 	 * Sets the audio sample rate.

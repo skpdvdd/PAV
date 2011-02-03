@@ -20,6 +20,7 @@
 package pav.lib.visualizer;
 
 import pav.lib.ColorMapper;
+import pav.lib.PAVException;
 import processing.core.PApplet;
 
 /**
@@ -84,7 +85,7 @@ public abstract class VisualizerAbstract implements Visualizer
 	}
 	
 	@Override
-	public void drawTo(PApplet applet)
+	public void drawTo(PApplet applet) throws PAVException
 	{
 		p = applet;
 	}

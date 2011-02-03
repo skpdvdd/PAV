@@ -146,4 +146,7 @@ public class Waveform extends VisualizerAbstract
 				return "Waveform";
 		}
 	}
+
+	@Override
+	public void dispose() { }
 }

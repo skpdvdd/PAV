@@ -204,4 +204,7 @@ public class Spectrum extends VisualizerAbstract
 				return "Spectrum";
 		}
 	}
+	
+	@Override
+	public void dispose() { }
 }

@@ -146,4 +146,13 @@ public class Phasor extends VisualizerAbstract
 	{
 		_mode = mode;
 	}
+	
+	@Override
+	public String toString()
+	{
+		return "Phasor";
+	}
+	
+	@Override
+	public void dispose() { }
 }

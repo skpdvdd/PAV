@@ -167,6 +167,11 @@ public class Rainbow extends VisualizerAbstract
 			default :
 				return "Rainbow";
 		}
-		
+	}
+	
+	@Override
+	public void dispose()
+	{
+		if(_buffer != null) _buffer.dispose();
 	}
 }

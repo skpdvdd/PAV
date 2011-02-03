@@ -30,6 +30,8 @@ import codeanticode.glgraphics.GLGraphicsOffScreen;
 import codeanticode.glgraphics.GLTexture;
 import codeanticode.glgraphics.GLTextureFilter;
 
+//TODO vm crashes when initialized with a PApplet that has already executed the draw() method
+
 /**
  * Generates bubbles based on sound. Requires GLGraphics render mode.
  * 
@@ -123,20 +125,18 @@ public class Bubbles extends VisualizerAbstract
 	}
 	
 	@Override
-	public void drawTo(PApplet applet)
-	{
+	public void drawTo(PApplet applet) throws PAVException
+	{		
+		if(! (applet.g instanceof GLGraphics)) {
+			throw new PAVException("Bubbles visualizer requires GLGraphics renderer.");
+		}
+		
 		super.drawTo(applet);
 		
-		if(_active != null) _active.dispose();
-		if(_done != null) _done.dispose();
-		
-		_active = null;
+		dispose();
+				
 		_done = null;
-		
-		if(_blur != null) _blur.delete();
-		if(_blend != null) _blend.delete();
-		if(_bloom != null) _bloom.delete();
-		if(_ageUpdate != null) _ageUpdate.delete();
+		_active = null;
 		
 		_blur = new GLTextureFilter(p, "shaders/bubbles/blur.xml");
 		
@@ -476,5 +476,20 @@ public class Bubbles extends VisualizerAbstract
 				return false;
 			}
 		}
+	}
+
+	@Override
+	public void dispose()
+	{
+		if(_active != null) _active.dispose();
+		if(_done != null) _active.dispose();
+		if(_history != null) _history.delete();
+		if(_age != null) _age.delete();
+		if(_temp != null) _temp.delete();
+		if(_temp2 != null) _temp2.delete();
+		if(_blur != null) _blur.delete();
+		if(_blend != null) _blend.delete();
+		if(_bloom != null) _bloom.delete();
+		if(_ageUpdate != null) _ageUpdate.delete();
 	}
 }

@@ -385,11 +385,7 @@ public class Boxes extends VisualizerAbstract
 			if(_buffer != null) {
 				_buffer.dispose();
 			}
-			
-			if(! (p.g instanceof GLGraphics)) {
-				throw new PAVException("Boxes visualizer requires GLGraphics renderer!");
-			}
-			
+				
 			_buffer = new GLGraphicsOffScreen(p, width, height, true);
 			resetCamera();
 		}
@@ -436,6 +432,22 @@ public class Boxes extends VisualizerAbstract
 		_buffer.endDraw();
 		
 		p.image(_buffer.getTexture(), area[0], area[1]);
+	}
+	
+	@Override
+	public void drawTo(PApplet applet) throws PAVException
+	{
+		if(! (applet.g instanceof GLGraphics)) {
+			throw new PAVException("Boxes visualizer requires GLGraphics renderer.");
+		}
+		
+		super.drawTo(applet);
+	}
+	
+	@Override
+	public String toString()
+	{
+		return "Boxes (" + _numCols + "x" + _numRows + ")";
 	}
 		
 	/**
@@ -509,5 +521,11 @@ public class Boxes extends VisualizerAbstract
 			_buffer.box(_dx, height, _dz);
 			_buffer.popMatrix();
 		}
+	}
+
+	@Override
+	public void dispose()
+	{
+		if(_buffer != null) _buffer.dispose();
 	}
 }

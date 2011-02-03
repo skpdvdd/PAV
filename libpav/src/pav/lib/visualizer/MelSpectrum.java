@@ -167,4 +167,7 @@ public class MelSpectrum extends VisualizerAbstract
 	{
 		return "MelSpectrum (" + _numBands + ")";
 	}
+	
+	@Override
+	public void dispose() { }
 }

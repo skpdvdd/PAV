@@ -172,4 +172,10 @@ public class Spectogram extends VisualizerAbstract
 	{
 		return "Spectogram";
 	}
+	
+	@Override
+	public void dispose()
+	{
+		if(_buffer != null) _buffer.dispose();
+	}
 }
