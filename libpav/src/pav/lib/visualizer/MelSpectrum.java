@@ -149,6 +149,7 @@ public class MelSpectrum extends VisualizerAbstract
 	public void filter(float[] filter)
 	{
 		_filter = filter;
+		_vMax = 0;
 	}
 	
 	/**

@@ -38,14 +38,14 @@ public class Phasor extends VisualizerAbstract
 	/**
 	 * Draw a a shape (connect dots with lines).
 	 */
-	public static final int MODE_SHAPE_LINEAR = 2;
+	public static final int MODE_LINES = 2;
 	
 	/**
 	 * Draw a shape (connect dots with curves).
 	 * 
 	 * This offers the best quality at the cost of speed.
 	 */
-	public static final int MODE_SHAPE_CURVE = 3;
+	public static final int MODE_CURVES = 3;
 	
 	private static final long serialVersionUID = 4412875346457402076L;
 	
@@ -62,7 +62,7 @@ public class Phasor extends VisualizerAbstract
 		_dMin = Float.MAX_VALUE;
 		_dMax = Float.MIN_VALUE;
 		
-		setMode(MODE_SHAPE_CURVE);
+		setMode(MODE_CURVES);
 		setColor(0xFFFF0000, 0xFFFFFF00, PApplet.RGB);
 	}
 
@@ -120,10 +120,10 @@ public class Phasor extends VisualizerAbstract
 			
 			p.stroke(cm.map(i));
 			
-			if(_mode == MODE_SHAPE_LINEAR) {
+			if(_mode == MODE_LINES) {
 				p.curveVertex(area[0] + width2 + x, area[1] + height2 + y);
 			}
-			else if(_mode == MODE_SHAPE_CURVE) {
+			else if(_mode == MODE_CURVES) {
 				p.curveVertex(area[0] + width2 + x, area[1] + height2 + y);
 			}
 			else {

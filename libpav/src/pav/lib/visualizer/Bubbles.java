@@ -23,6 +23,7 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.Random;
 import pav.lib.PAVException;
+import pav.lib.ShaderManager;
 import pav.lib.frame.Frame;
 import processing.core.PApplet;
 import codeanticode.glgraphics.GLGraphics;
@@ -138,19 +139,19 @@ public class Bubbles extends VisualizerAbstract
 		_done = null;
 		_active = null;
 		
-		_blur = new GLTextureFilter(p, "shaders/bubbles/blur.xml");
+		_blur = ShaderManager.getTextureFilter("bubbles-blur");
 		
-		_blend = new GLTextureFilter(p, "shaders/bubbles/blend.xml");
+		_blend = ShaderManager.getTextureFilter("bubbles-blend");
 		_blend.setParameterValue("EmphBase", 0.1f);
 		_blend.setParameterValue("EmphBlend", 0.15f);
 		
-		_bloom = new GLTextureFilter(p, "shaders/common/bloom.xml");
+		_bloom = ShaderManager.getTextureFilter("common-bloom");
 		_bloom.setParameterValue("T1", 1.25f);
 		_bloom.setParameterValue("T2", 3f);
 		_bloom.setParameterValue("Intensity", 0.7f);
 		_bloom.setParameterValue("LumaCoeffs", new float[] { 0.5f, 0.5f, 0.5f, 1.0f });
 		
-		_ageUpdate = new GLTextureFilter(p, "shaders/bubbles/ageupdate.xml");
+		_ageUpdate = ShaderManager.getTextureFilter("bubbles-ageupdate");
 		_ageUpdate.setParameterValue("Add", 0.05f);
 	}
 	
@@ -487,9 +488,5 @@ public class Bubbles extends VisualizerAbstract
 		if(_age != null) _age.delete();
 		if(_temp != null) _temp.delete();
 		if(_temp2 != null) _temp2.delete();
-		if(_blur != null) _blur.delete();
-		if(_blend != null) _blend.delete();
-		if(_bloom != null) _bloom.delete();
-		if(_ageUpdate != null) _ageUpdate.delete();
 	}
 }

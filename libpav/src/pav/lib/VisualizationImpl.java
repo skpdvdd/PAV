@@ -125,6 +125,10 @@ public class VisualizationImpl implements Visualization
 	{
 		visualizer.drawTo(_p);
 		
+		if(_visualizers.containsKey(level)) {
+			removeVisualizerAt(level);
+		}
+		
 		_visualizers.put(level, visualizer);
 		_visualizerNames.put(name, level);
 	}
@@ -142,7 +146,7 @@ public class VisualizationImpl implements Visualization
 		}
 		
 		if(key != null) {
-			_visualizers.remove(key);
+			removeVisualizerAt(key);
 		}
 	}
 	
@@ -157,7 +161,21 @@ public class VisualizationImpl implements Visualization
 	@Override
 	public void removeVisualizerAt(int level)
 	{
-		_visualizers.remove(level);
+		Visualizer remove = _visualizers.remove(level);
+		remove.dispose();
+		
+		String key = null;
+			
+		for(Map.Entry<String, Integer> e : _visualizerNames.entrySet()) {
+			if(e.getValue().equals(level)) {
+				key = e.getKey();
+				break;
+			}
+		}
+
+		if(key != null) {
+			_visualizerNames.remove(key);
+		}
 	}
 	
 	@Override

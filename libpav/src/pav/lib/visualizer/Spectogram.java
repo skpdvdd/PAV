@@ -47,7 +47,7 @@ public class Spectogram extends VisualizerAbstract
 	{
 		rememberMax(true);
 		noCutoffFrequencies();
-		setHighOnTop(true);
+		setHighOnTop(false);
 		setColor(new float[] { 0, 0.1f, 0.5f, 1 }, new int[] { 0x00000000, 0xFF0000FF, 0xFF33FF33, 0xFFFF0000 }, PApplet.RGB);
 	}
 	
@@ -115,10 +115,10 @@ public class Spectogram extends VisualizerAbstract
 		int[] colors = new int[numBands];
 		
 		for(int i = from; i <= to; i++) {
-			colors[i] = cm.map(bands[i]);
+			colors[i - from] = cm.map(bands[i]);
 		}
 		
-		_buffer.add(colors, _highOnTop);
+		_buffer.add(colors, ! _highOnTop);
 		_buffer.draw((int) area[0], (int) area[1], width, height);
 	}
 			
