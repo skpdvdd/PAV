@@ -5,7 +5,7 @@ package pav;
  * 
  * @author christopher
  */
-class Console
+public class Console
 {
 	/**
 	 * Sends a message to the console.

@@ -10,9 +10,13 @@ import java.io.ObjectInputStream;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.Map;
 import codeanticode.glgraphics.GLGraphics;
+import pav.configurator.Configurator;
+import pav.configurator.ConfiguratorFactory;
 import pav.lib.PAVException;
+import pav.lib.ShaderManager;
 import pav.lib.Visualization;
 import pav.lib.VisualizationImpl;
 import pav.lib.visualizer.Boxes;
@@ -44,7 +48,10 @@ public class PAV extends PApplet
 	private boolean _drawStatus;
 	private final PFont _statusFont;
 	private volatile float[] _frame;
-
+	private int _inputHistoryPosition;
+	private final ArrayList<String> _inputHistory;
+	private final ArrayList<Configurator> _configurators;
+	
 	/**
 	 * Ctor.
 	 * 
@@ -56,6 +63,9 @@ public class PAV extends PApplet
 		_frame = new float[1024];
 		_statusFont = createFont("sans", 12, true);
 		_inputBuffer = new StringBuilder();
+		_inputHistory = new ArrayList<String>();
+		_configurators = new ArrayList<Configurator>();
+		_configurators.add(ConfiguratorFactory.generic());
 		
 		_clientConnection = new ClientConnection(Config.port);
 		_clientConnectionThread = new Thread(_clientConnection, "ClientConnection");
@@ -94,15 +104,10 @@ public class PAV extends PApplet
 		_visualization.setSampleRate(44100);
 		
 		if(g instanceof GLGraphics) {
-			Console.out("Adding Bubbles visualizer by default because it currently does not support adding at runtime.");
-			
 			try {
-				_visualization.addVisualizer(new Bubbles());
+				ShaderManager.initialize(this);
 			}
-			catch (PAVException e) {
-				Console.error("An error occured while adding Bubbles:");
-				Console.error(e);
-			}
+			catch(PAVException e) { }
 		}
 	}
 
@@ -172,16 +177,14 @@ public class PAV extends PApplet
 				
 		if(_visualization.numVisualizers() == 0) {
 			fill(0xFFFF0000);
-			text("No visualizers active. Add one by typing 'add x' and hit enter", x, y);
-			y += 16;
-			text("where x is {waveform, boxes, phasor, rainbow, spectogram, spectrum, melspectrum}.", x, y);
+			text("No visualizers active.", x, y);
 			y += 20;
 		}
 		else {
 			fill(200);
 			
 			for(Map.Entry<Integer, Visualizer> v : _visualization.getVisualizers().entrySet()) {
-				text(v.getKey() + " - " + v.getValue(), x, y);
+				text("[" + v.getKey() + "] - " + v.getValue(), x, y);
 				y += 18;
 			}
 		}
@@ -191,6 +194,10 @@ public class PAV extends PApplet
 			text("No client connection.", x ,y);
 			y += 20;
 		}
+		
+		fill(0xFF00FF00);
+		text("Type in this window to execute commands.", x, y);
+		y += 20;
 		
 		fill(255);
 		text("Type 's' to toggle this information.", x, y);
@@ -205,65 +212,191 @@ public class PAV extends PApplet
 			return;
 		}
 		
+		if(keyCode == 38) {
+			if(! _inputHistory.isEmpty()) {
+				_inputHistoryPosition = (_inputHistoryPosition == 0) ? _inputHistory.size() - 1 : _inputHistoryPosition - 1;
+				_inputBuffer = new StringBuilder(_inputHistory.get(_inputHistoryPosition));
+				redraw();
+			}
+			
+			return;
+		}
+		
+		if(keyCode == 40) {
+			if(! _inputHistory.isEmpty()) {
+				_inputHistoryPosition++;
+				
+				if(_inputHistoryPosition > _inputHistory.size() - 1) {
+					_inputHistoryPosition = 0;
+				}
+				
+				_inputBuffer = new StringBuilder(_inputHistory.get(_inputHistoryPosition));
+				redraw();
+			}
+			
+			return;
+		}
+		
+		if(keyCode == 8) {
+			if(_inputBuffer.length() > 0) {
+				_inputBuffer.deleteCharAt(_inputBuffer.length() - 1);
+				redraw();
+			}
+	
+			return;
+		}
+		
 		if(keyCode != 10) {
 			_inputBuffer.append(key);
 			redraw();
 			return;
 		}
 		
+		boolean valid = false;
 		String[] in = _inputBuffer.toString().split(" ");
-		_inputBuffer = new StringBuilder();
-		
-		if(in[0].equals("add") && in.length == 2) {
-			_addVisualizer(in[1]);
+
+		if(in[0].equals("add") && in.length >= 2) {
+			valid = _addVisualizer(Util.removeFirst(in));
 		}
 		else if(in[0].equals("rem") && in.length == 2) {
-			_removeVisualizer(in[1]);
+			valid = _removeVisualizer(in[1]);
 		}
+		else if(in[0].equals("c") && _inputBuffer.length() > 2) {
+			valid = _configureVisualizer(_inputBuffer.substring(2, _inputBuffer.length()));
+		}
+		
+		if(valid) {
+			_inputHistory.add(_inputBuffer.toString());
+			_inputHistoryPosition = 0;
+		}
+		
+		_inputBuffer = new StringBuilder();
 		
 		redraw();
 	}
 	
-	private void _addVisualizer(String name)
+	private boolean _addVisualizer(String[] in)
 	{
+		String name = in[0];
+		Integer level = null;
+		
+		if(in.length == 2) {
+			try {
+				level = new Integer(Integer.parseInt(in[1]));
+			}
+			catch(NumberFormatException e) { }
+		}
+		
 		try {
+			Configurator configurator = null;
+			
 			if(name.equals("waveform")) {
-				_visualization.addVisualizer(new Waveform());
+				_addVisualizer(new Waveform(), level);
+				configurator = ConfiguratorFactory.waveform();
 			}
 			else if(name.equals("boxes")) {
-				_visualization.addVisualizer(new Boxes());
+				if(! (g instanceof GLGraphics)) {
+					System.out.println("Visualizer requires GLGraphics mode.");
+					return false;
+				}
+				
+				_addVisualizer(new Boxes(), level);
+				configurator = ConfiguratorFactory.boxes();
 			}
-//			else if(name.equals("bubbles")) {
-//				_visualization.addVisualizer(new Bubbles());
-//			}
+			else if(name.equals("bubbles")) {
+				if(! (g instanceof GLGraphics)) {
+					System.out.println("Visualizer requires GLGraphics mode.");
+					return false;
+				}
+				
+				_addVisualizer(new Bubbles(), level);
+				configurator = ConfiguratorFactory.bubbles();
+			}
 			else if(name.equals("phasor")) {
-				_visualization.addVisualizer(new Phasor());
+				_addVisualizer(new Phasor(), level);
+				configurator = ConfiguratorFactory.phasor();
 			}
-			else if(name.equals("rainbow")) {
-				_visualization.addVisualizer(new Rainbow());
+			else if(name.equals("rainbow")) {				
+				_addVisualizer(new Rainbow(), level);
+				configurator = ConfiguratorFactory.rainbow();
 			}
 			else if(name.equals("spectogram")) {
-				_visualization.addVisualizer(new Spectogram());
+				_addVisualizer(new Spectogram(), level);
+				configurator = ConfiguratorFactory.spectogram();
 			}
 			else if(name.equals("spectrum")) {
-				_visualization.addVisualizer(new Spectrum());
+				_addVisualizer(new Spectrum(), level);
+				configurator = ConfiguratorFactory.spectrum();
 			}
 			else if(name.equals("melspectrum")) {
-				_visualization.addVisualizer(new MelSpectrum());
-			};
+				_addVisualizer(new MelSpectrum(), level);
+				configurator = ConfiguratorFactory.melSpectrum();
+			}
+			else {
+				return false;
+			}
+			
+			if(configurator != null && ! (_configurators.contains(configurator))) {
+				_configurators.add(configurator);
+			}
+			
+			return true;
 		}
 		catch (PAVException e) {
 			Console.error("An error occured while adding a visualizer:");
 			Console.error(e);
+			return false;
 		}
 	}
 	
-	private void _removeVisualizer(String level)
+	private void _addVisualizer(Visualizer v, Integer level) throws PAVException
+	{
+		if(level == null) {
+			_visualization.addVisualizer(v);
+		}
+		else {
+			_visualization.addVisualizer(v, level);
+		}
+	}
+	
+	private boolean _removeVisualizer(String level)
 	{
 		try {
 			_visualization.removeVisualizerAt(Integer.parseInt(level));
+			return true;
 		}
-		catch (NumberFormatException e) { }
+		catch (NumberFormatException e)
+		{
+			return false;
+		}
+	}
+	
+	private boolean _configureVisualizer(String query)
+	{
+		String[] q = query.split(" ");
+		
+		if(q.length < 3) return false;
+		
+		Visualizer subject = null;
+		
+		try {
+			subject = _visualization.getVisualizer(Integer.parseInt(q[0]));
+		}
+		catch(NumberFormatException e) {
+			return false;
+		}
+
+		if(subject == null) return false;
+		
+		query = query.substring(q[0].length() + 1);
+
+		for(Configurator c : _configurators) {
+			if(c.process(subject, query) == true) {
+				return true;
+			}
+		}
+		
+		return false;
 	}
 
 	/**
@@ -294,7 +427,7 @@ public class PAV extends PApplet
 		}
 		
 		/**
-		 * Returns true if a clien connection is established, otherwise false.
+		 * Returns true if a client connection is established, otherwise false.
 		 * 
 		 * @return True if there is a client connection
 		 */
