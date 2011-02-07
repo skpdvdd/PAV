@@ -59,6 +59,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
       <li><a href="#index_d"><span>d</span></a></li>
       <li><a href="#index_f"><span>f</span></a></li>
       <li><a href="#index_g"><span>g</span></a></li>
+      <li><a href="#index_i"><span>i</span></a></li>
       <li><a href="#index_l"><span>l</span></a></li>
       <li><a href="#index_m"><span>m</span></a></li>
       <li><a href="#index_n"><span>n</span></a></li>
@@ -167,11 +168,12 @@ Here is a list of all documented class members with links to the class documenta
 <li>getSampleRate()
 : <a class="el" href="classpav_1_1lib_1_1frame_1_1Frame.html#a045ead574f706137ef22585548905623">pav::lib::frame::Frame</a>
 </li>
+<li>getTextureFilter()
+: <a class="el" href="classpav_1_1lib_1_1ShaderManager.html#abfcd285940cca03f5453dd036897a493">pav::lib::ShaderManager</a>
+</li>
 <li>getVisualizer()
-: <a class="el" href="interfacepav_1_1lib_1_1Visualization.html#a9ed073ed99af33af7dc599ccc5d6adfe">pav::lib::Visualization</a>
-, <a class="el" href="classpav_1_1lib_1_1VisualizationImpl.html#a52f44677c909ec4c96a3f1476df7f8f4">pav::lib::VisualizationImpl</a>
-, <a class="el" href="interfacepav_1_1lib_1_1Visualization.html#af7bf598896003676c79bb61104b73007">pav::lib::Visualization</a>
-, <a class="el" href="classpav_1_1lib_1_1VisualizationImpl.html#a4f4a7b99935e24f446a41f3f9edf557d">pav::lib::VisualizationImpl</a>
+: <a class="el" href="classpav_1_1lib_1_1VisualizationImpl.html#a52f44677c909ec4c96a3f1476df7f8f4">pav::lib::VisualizationImpl</a>
+, <a class="el" href="interfacepav_1_1lib_1_1Visualization.html#a9ed073ed99af33af7dc599ccc5d6adfe">pav::lib::Visualization</a>
 </li>
 <li>getVisualizers()
 : <a class="el" href="interfacepav_1_1lib_1_1Visualization.html#a5a6b09b4923e1b17cbf2e5e00bbe9fc0">pav::lib::Visualization</a>
@@ -179,6 +181,13 @@ Here is a list of all documented class members with links to the class documenta
 </li>
 <li>getWidth()
 : <a class="el" href="classpav_1_1lib_1_1StreamingBuffer.html#ad17be712612dc75c1ffcfa62b3daba79">pav::lib::StreamingBuffer</a>
+</li>
+</ul>
+
+
+<h3><a class="anchor" id="index_i"></a>- i -</h3><ul>
+<li>initialize()
+: <a class="el" href="classpav_1_1lib_1_1ShaderManager.html#ac424297339c4f91b3b0ee59bdce0bf70">pav::lib::ShaderManager</a>
 </li>
 </ul>
 
@@ -213,6 +222,9 @@ Here is a list of all documented class members with links to the class documenta
 : <a class="el" href="classpav_1_1lib_1_1visualizer_1_1Waveform.html#a1bfde1e1ffa5422acf8a1e5b8ddf3a1d">pav::lib::visualizer::Waveform</a>
 , <a class="el" href="classpav_1_1lib_1_1visualizer_1_1Spectrum.html#a8554d161c383858e311cf39046c32ae1">pav::lib::visualizer::Spectrum</a>
 </li>
+<li>MODE_CURVES
+: <a class="el" href="classpav_1_1lib_1_1visualizer_1_1Phasor.html#ab5b0155dcb2da518c043cc8789656361">pav::lib::visualizer::Phasor</a>
+</li>
 <li>MODE_DOTS
 : <a class="el" href="classpav_1_1lib_1_1visualizer_1_1Phasor.html#a9cea80f2a22a8295742738d6a9cef2bc">pav::lib::visualizer::Phasor</a>
 , <a class="el" href="classpav_1_1lib_1_1visualizer_1_1Spectrum.html#acccfd410559c8fa2ac149024bdaa96b5">pav::lib::visualizer::Spectrum</a>
@@ -224,15 +236,12 @@ Here is a list of all documented class members with links to the class documenta
 <li>MODE_INTENSITY
 : <a class="el" href="classpav_1_1lib_1_1visualizer_1_1Rainbow.html#a56517bb56f159353730fa15e04c2d797">pav::lib::visualizer::Rainbow</a>
 </li>
+<li>MODE_LINES
+: <a class="el" href="classpav_1_1lib_1_1visualizer_1_1Phasor.html#a5cb9a3c95696e413c2366b9b2ecab0e6">pav::lib::visualizer::Phasor</a>
+</li>
 <li>MODE_SHAPE
 : <a class="el" href="classpav_1_1lib_1_1visualizer_1_1Waveform.html#aa05e4a69b787dda5270117277c52a433">pav::lib::visualizer::Waveform</a>
 , <a class="el" href="classpav_1_1lib_1_1visualizer_1_1Spectrum.html#a6fc935f34fbf8806ab2b3a6c4fc30367">pav::lib::visualizer::Spectrum</a>
-</li>
-<li>MODE_SHAPE_CURVE
-: <a class="el" href="classpav_1_1lib_1_1visualizer_1_1Phasor.html#a991213efb084088e7eaac0fceb93e9a3">pav::lib::visualizer::Phasor</a>
-</li>
-<li>MODE_SHAPE_LINEAR
-: <a class="el" href="classpav_1_1lib_1_1visualizer_1_1Phasor.html#a48467818be0446c1506f6929f7bcb9ef">pav::lib::visualizer::Phasor</a>
 </li>
 </ul>
 
@@ -460,7 +469,7 @@ Here is a list of all documented class members with links to the class documenta
 </iframe>
 </div>
 
-<hr class="footer"/><address class="footer"><small>Generated on Thu Feb 3 2011 18:14:51 for ProcessingAudioVisualization(PAV) by&nbsp;
+<hr class="footer"/><address class="footer"><small>Generated on Mon Feb 7 2011 15:05:08 for ProcessingAudioVisualization(PAV) by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.1 </small></address>
 </body>

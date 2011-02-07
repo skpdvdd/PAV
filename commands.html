@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>Processing Audio Visualization (PAV)</title>
+		<link rel="stylesheet" media="all" href="style.css" />
+	</head>
+	<body>
+		<div id="main">
+			<div class="content" style="padding-top: 170px;">
+				<h1>Processing Audio Visualization (PAV) - Commands</h1>
+				<p>PAV allows you to change how music is visualized by adding, configuring, and removing Visualizers at runtime. You can issue commands to PAV by writing into the PAV window and hitting enter. What you write is displayed at the bottom right of the window (see image below). You can scroll through the command history by using the up- and down-arrow keys. Note that there are no error messages: if you enter a valid command, it is executed. If the command is invalid, nothing happens. This page lists all available commands.</p>
+			</div>
+			<div class="fig">
+				<img src="img/pav.png" />
+				<p>The PAV window.</p>
+			</div>
+			<div class="content">
+				<h2>Adding and removing Visualizers</h2>
+				
+				<p>To add a Visualizer type <span class="code">add x [level]</span>, where <span class="code">x</span> is the name of the Visualizer to add (see <a href="visualizers.html">Visualizers</a>) and <span class="code">level</span> is the (optional) level you want to place the Visualizer at in the stack. All active visualizers are placed in a stack and drawn independently from each other. Visualizers with lower levels are drawn first. Visualizers can be removed via <span class="code">rem level</span>. You can see all active Visualizers and their level at the top right of the PAV window.</p>
+				
+				<h2>Configuring Visualizers</h2>
+				
+				<p>Active Visualizers can be configured at runtime via <span class="code">c level attribute value1 [value2 .. valuen]</span>. The remainder of this page shows all available commands for all visualizers. The prefix <span class="code">c level</span> is omited for clarity.</p>
+				<h3>Common Attributes</h3>
+				
+				The following attributes are supported by all Visualizers.
+				<div class="cmd">
+					<div class="syntax">color COLOR1 [COLOR2 ... COLORN]</div>
+					<div class="desc">Allows you to specify the color(s) used by the Visualizer. You can specify any number of colors. How these colors are used depends on the Visualizer. All colors must be of the form RRGGBB or AARRGGBB.</div>
+				</div>	
+				<div class="cmd">
+					<div class="syntax">area LOWX LOWY HIGHX HIGHY</div>
+					<div class="desc">Sets the area of the display window that is available to the Visualizer. How this area is used depends on the Visualizer. All values are relative to the window size and must be between 0 and 1 (e.g. 0.5 means half of the window width/height). The origin of the coordinate system is at the top left.</div>
+				</div>
+				
+				<h3>Waveform</h3>
+				
+				<div class="cmd">
+					<div class="syntax">mode MODE</div>
+					<div class="desc">Sets the drawing mode. Valid modes are <span class="code">bins</span> (default), <span class="code">dots</span> and <span class="code">shape</span>.</div>
+				</div>
+				
+				<h3>Spectrum</h3>
+				
+				<div class="cmd">
+					<div class="syntax">mode MODE</div>
+					<div class="desc">Sets the drawing mode. Valid modes are <span class="code">bins</span> (default), <span class="code">dots</span> and <span class="code">shape</span>.</div>
+				</div>
+				<div class="cmd">
+					<div class="syntax">freq F1 [F2]</div>
+					<div class="desc">Sets the frequency range to display. All values must be positive integers. If only F1 is set, it corresponds to the maximum frequency (all frequencies up to F1 are visualized). If F1 is 0, all frequencies are displayed (default). If F2 is set too, F1 and F2 specify the minimum/maximum frequency to display.</div>
+				</div>
+				
+				<h3>Spectrum</h3>
+				
+				<div class="cmd">
+					<div class="syntax">hightop V</div>
+					<div class="desc">Sets whether to display high frequencies at the top or at the bottom (default). V must be 1 or 0.</div>
+				</div>
+				<div class="cmd">
+					<div class="syntax">freq F1 [F2]</div>
+					<div class="desc">Sets the frequency range to display. All values must be positive integers. If only F1 is set, it corresponds to the maximum frequency (all frequencies up to F1 are visualized). If F1 is 0, all frequencies are displayed (default). If F2 is set too, F1 and F2 specify the minimum/maximum frequency to display.</div>
+				</div>
+				
+				<h3>Rainbow</h3>
+				
+				<div class="cmd">
+					<div class="syntax">mode MODE</div>
+					<div class="desc">Specifies whether to use the frequency distribution (default) or the intensity of the sound for calculating colors.</div>
+				</div>
+				
+				<h3>Phasor</h3>
+				
+				<div class="cmd">
+					<div class="syntax">mode MODE</div>
+					<div class="desc">Sets the drawing mode. Valid modes are <span class="code">dots</span>, <span class="code">lines</span> and <span class="code">curves</span> (default).</div>
+				</div>
+				
+				<h3>MelSpectrum</h3>
+				
+				<div class="cmd">
+					<div class="syntax">num NUM</div>
+					<div class="desc">Sets the number of bands to calculate (default is 40). NUM must be a positive integer.</div>
+				</div>
+				
+				<div class="cmd">
+					<div class="syntax">bcolor COLOR</div>
+					<div class="desc">Sets the color of the rectangle borders. COLOR must be of the form RRGGBB or AARRGGBB.</div>
+				</div>
+				
+				<div class="cmd">
+					<div class="syntax">quantize STEPS</div>
+					<div class="desc">Sets the number of quantization steps (see <a href="http://en.wikipedia.org/wiki/Quantization_(signal_processing)" target="_blank">Wikipedia</a>). STEPS must be an integer. Set to 0 to disable.</div>
+				</div>
+				
+				<h3>Boxes</h3>
+				
+				<div class="cmd">
+					<div class="syntax">rotate FACTOR</div>
+					<div class="desc">Rotates the boxes at a speed specified by FACTOR. Factor must be between -5 and 5. Set to 0 to disable.</div>
+				</div>
+				
+				<div class="cmd">
+					<div class="syntax">bcolor COLOR</div>
+					<div class="desc">Sets the color of the box edges. COLOR must be of the form RRGGBB or AARRGGBB.</div>
+				</div>
+				
+				<div class="cmd">
+					<div class="syntax">quantize STEPS</div>
+					<div class="desc">Sets the number of quantization steps (see <a href="http://en.wikipedia.org/wiki/Quantization_(signal_processing)" target="_blank">Wikipedia</a>). STEPS must be an integer. Set to 0 to disable.</div>
+				</div>
+				
+				<div class="cmd">
+					<div class="syntax">maxheight HEIGHT</div>
+					<div class="desc">Specifies the maximum height of the boxes. Must be a positive integer.</div>
+				</div>
+				
+				<h3>Bubbles</h3>
+				
+				<div class="cmd">
+					<div class="syntax">bloom V</div>
+					<div class="desc">Whether to emphazise bright colors or not. V must be 0 or 1.</div>
+				</div>
+				
+				<div class="cmd">
+					<div class="syntax">size MIN MAX</div>
+					<div class="desc">Sets the minimum and maximum size of the bubbles. The sizes are relative to the display area width. MIN and MAX must be between 0 and 0.5.</div>
+				</div>
+				
+				<div class="cmd">
+					<div class="syntax">rate MIN MAX</div>
+					<div class="desc">Specifies the minimum and maximum rate at which bubbles are spawned. The values are per frame, i.e, a rate of 0.1 means that on average 1 bubble is spawned every 10 frames. MIN and MAX must be between 0 and 5.</div>
+				</div>
+				
+				<div class="cmd">
+					<div class="syntax">darken FACTOR</div>
+					<div class="desc">Sets the darken factor, that is how fast bubbles disappear. FACTOR must be positive, default is 12.</div>
+				</div>
+				
+				<div id="copyright">Processing Audio Visualization (PAV)<br> Copyright (C) 2011  Christopher Pramerdorfer</div>
+			</div>
+		</div>
+	</body>
+</html> 

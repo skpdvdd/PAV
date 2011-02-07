@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
-<title>ProcessingAudioVisualization(PAV): pav::lib::PAVException Class Reference</title>
+<title>ProcessingAudioVisualization(PAV): pav::lib::ShaderManager Class Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <link href="search/search.css" rel="stylesheet" type="text/css"/>
 <script type="text/javaScript" src="search/search.js"></script>
@@ -48,128 +48,87 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
     <ul>
       <li><b>pav</b>      </li>
       <li><b>lib</b>      </li>
-      <li><a class="el" href="classpav_1_1lib_1_1PAVException.html">pav::lib::PAVException</a>      </li>
+      <li><a class="el" href="classpav_1_1lib_1_1ShaderManager.html">pav::lib::ShaderManager</a>      </li>
     </ul>
   </div>
 </div>
 <div class="header">
   <div class="summary">
-<a href="#pub-methods">Public Member Functions</a>  </div>
+<a href="#pub-static-methods">Static Public Member Functions</a>  </div>
   <div class="headertitle">
-<h1>pav::lib::PAVException Class Reference</h1>  </div>
+<h1>pav::lib::ShaderManager Class Reference</h1>  </div>
 </div>
 <div class="contents">
-<!-- doxytag: class="pav::lib::PAVException" -->
-<p><a href="classpav_1_1lib_1_1PAVException-members.html">List of all members.</a></p>
+<!-- doxytag: class="pav::lib::ShaderManager" -->
+<p><a href="classpav_1_1lib_1_1ShaderManager-members.html">List of all members.</a></p>
 <table class="memberdecls">
-<tr><td colspan="2"><h2><a name="pub-methods"></a>
-Public Member Functions</h2></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpav_1_1lib_1_1PAVException.html#ad3645bf6ae3917b6f1c8751e0fe72f82">PAVException</a> ()</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpav_1_1lib_1_1PAVException.html#a6892f89f5ec0e4647c32ab719360888f">PAVException</a> (String message)</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpav_1_1lib_1_1PAVException.html#a8bb440f4ca35c427ba91aba9c6d85e41">PAVException</a> (Throwable cause)</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpav_1_1lib_1_1PAVException.html#a49e9759c7f5f09b1e7f117e90ff81924">PAVException</a> (String message, Throwable cause)</td></tr>
+<tr><td colspan="2"><h2><a name="pub-static-methods"></a>
+Static Public Member Functions</h2></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">static void&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpav_1_1lib_1_1ShaderManager.html#ac424297339c4f91b3b0ee59bdce0bf70">initialize</a> (PApplet p)  throws PAVException 	</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">static GLTextureFilter&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpav_1_1lib_1_1ShaderManager.html#abfcd285940cca03f5453dd036897a493">getTextureFilter</a> (String name)  throws PAVException 	</td></tr>
 </table>
 <hr/><a name="_details"></a><h2>Detailed Description</h2>
-<p>Base class of all PAV-specific exceptions.</p>
+<p>Manages GLGraphics shaders.</p>
 <dl class="author"><dt><b>Author:</b></dt><dd>christopher </dd></dl>
-<hr/><h2>Constructor &amp; Destructor Documentation</h2>
-<a class="anchor" id="ad3645bf6ae3917b6f1c8751e0fe72f82"></a><!-- doxytag: member="pav::lib::PAVException::PAVException" ref="ad3645bf6ae3917b6f1c8751e0fe72f82" args="()" -->
+<hr/><h2>Member Function Documentation</h2>
+<a class="anchor" id="abfcd285940cca03f5453dd036897a493"></a><!-- doxytag: member="pav::lib::ShaderManager::getTextureFilter" ref="abfcd285940cca03f5453dd036897a493" args="(String name)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">pav::lib::PAVException::PAVException </td>
-          <td>(</td>
-          <td class="paramname"></td>
-          <td>&nbsp;)&nbsp;</td>
-          <td><code> [inline]</code></td>
-        </tr>
-      </table>
-</div>
-<div class="memdoc">
-<p>Ctor. </p>
-
-</div>
-</div>
-<a class="anchor" id="a6892f89f5ec0e4647c32ab719360888f"></a><!-- doxytag: member="pav::lib::PAVException::PAVException" ref="a6892f89f5ec0e4647c32ab719360888f" args="(String message)" -->
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">pav::lib::PAVException::PAVException </td>
+          <td class="memname">static GLTextureFilter pav::lib::ShaderManager::getTextureFilter </td>
           <td>(</td>
           <td class="paramtype">String&nbsp;</td>
-          <td class="paramname"> <em>message</em></td>
+          <td class="paramname"> <em>name</em></td>
           <td>&nbsp;)&nbsp;</td>
-          <td><code> [inline]</code></td>
+          <td>  throws <a class="el" href="classpav_1_1lib_1_1PAVException.html">PAVException</a> 	<code> [inline, static]</code></td>
         </tr>
       </table>
 </div>
 <div class="memdoc">
-<p>Ctor.</p>
+<p>Returns a texture filter.</p>
+<p>Texture filters are shared by all visualizers, therefore settings might be changed by other visualizers.</p>
 <dl><dt><b>Parameters:</b></dt><dd>
   <table border="0" cellspacing="2" cellpadding="0">
-    <tr><td valign="top"></td><td valign="top"><em>message</em>&nbsp;</td><td>The error message </td></tr>
+    <tr><td valign="top"></td><td valign="top"><em>name</em>&nbsp;</td><td>The name of the texture filter. Must not be null </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="return"><dt><b>Returns:</b></dt><dd>The filter </dd></dl>
+<dl><dt><b>Exceptions:</b></dt><dd>
+  <table border="0" cellspacing="2" cellpadding="0">
+    <tr><td valign="top"></td><td valign="top"><em><a class="el" href="classpav_1_1lib_1_1PAVException.html">PAVException</a></em>&nbsp;</td><td>If the filter name is unknown </td></tr>
   </table>
   </dd>
 </dl>
 
 </div>
 </div>
-<a class="anchor" id="a8bb440f4ca35c427ba91aba9c6d85e41"></a><!-- doxytag: member="pav::lib::PAVException::PAVException" ref="a8bb440f4ca35c427ba91aba9c6d85e41" args="(Throwable cause)" -->
+<a class="anchor" id="ac424297339c4f91b3b0ee59bdce0bf70"></a><!-- doxytag: member="pav::lib::ShaderManager::initialize" ref="ac424297339c4f91b3b0ee59bdce0bf70" args="(PApplet p)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">pav::lib::PAVException::PAVException </td>
+          <td class="memname">static void pav::lib::ShaderManager::initialize </td>
           <td>(</td>
-          <td class="paramtype">Throwable&nbsp;</td>
-          <td class="paramname"> <em>cause</em></td>
+          <td class="paramtype">PApplet&nbsp;</td>
+          <td class="paramname"> <em>p</em></td>
           <td>&nbsp;)&nbsp;</td>
-          <td><code> [inline]</code></td>
+          <td>  throws <a class="el" href="classpav_1_1lib_1_1PAVException.html">PAVException</a> 	<code> [inline, static]</code></td>
         </tr>
       </table>
 </div>
 <div class="memdoc">
-<p>Ctor.</p>
+<p>Initializes the shaders. Must be called before initializing any visualizers.</p>
 <dl><dt><b>Parameters:</b></dt><dd>
   <table border="0" cellspacing="2" cellpadding="0">
-    <tr><td valign="top"></td><td valign="top"><em>cause</em>&nbsp;</td><td>The cause of the error </td></tr>
+    <tr><td valign="top"></td><td valign="top"><em>p</em>&nbsp;</td><td>The PApplet to use. Must not be null </td></tr>
   </table>
   </dd>
 </dl>
-
-</div>
-</div>
-<a class="anchor" id="a49e9759c7f5f09b1e7f117e90ff81924"></a><!-- doxytag: member="pav::lib::PAVException::PAVException" ref="a49e9759c7f5f09b1e7f117e90ff81924" args="(String message, Throwable cause)" -->
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">pav::lib::PAVException::PAVException </td>
-          <td>(</td>
-          <td class="paramtype">String&nbsp;</td>
-          <td class="paramname"> <em>message</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">Throwable&nbsp;</td>
-          <td class="paramname"> <em>cause</em></td><td>&nbsp;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td><td><code> [inline]</code></td>
-        </tr>
-      </table>
-</div>
-<div class="memdoc">
-<p>Ctor.</p>
-<dl><dt><b>Parameters:</b></dt><dd>
+<dl><dt><b>Exceptions:</b></dt><dd>
   <table border="0" cellspacing="2" cellpadding="0">
-    <tr><td valign="top"></td><td valign="top"><em>message</em>&nbsp;</td><td>The error message </td></tr>
-    <tr><td valign="top"></td><td valign="top"><em>cause</em>&nbsp;</td><td>The cause of the error </td></tr>
+    <tr><td valign="top"></td><td valign="top"><em><a class="el" href="classpav_1_1lib_1_1PAVException.html">PAVException</a></em>&nbsp;</td><td>On errors </td></tr>
   </table>
   </dd>
 </dl>
@@ -177,7 +136,7 @@ Public Member Functions</h2></td></tr>
 </div>
 </div>
 <hr/>The documentation for this class was generated from the following file:<ul>
-<li>src/pav/lib/PAVException.java</li>
+<li>src/pav/lib/ShaderManager.java</li>
 </ul>
 </div>
 <!--- window showing the filter options -->
