@@ -24,14 +24,16 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.BufferedReader;
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.Socket;
+import java.nio.ByteBuffer;
+import java.nio.FloatBuffer;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -570,7 +572,7 @@ public class Player extends PApplet
 			if(!_pavControl.isActive()) return;
 			
 			if(! _sampleQueue.offerLast(samples)) {
-				Console.error("Failed to add sample to PAV queue.");
+				Console.out("Failed to add frame to PAV queue.");
 			}
 		}
 
@@ -603,9 +605,17 @@ public class Player extends PApplet
 		private Socket _control, _data;
 		private PrintWriter _controlOut;
 		private BufferedReader _controlIn;
-		private ObjectOutputStream _dataOut;
+		private DataOutputStream _dataOut;
 		private float _lastSampleRate;
 		private boolean _active;
+		
+		private byte[] _byteOut;
+		private FloatBuffer _frameBuffer;
+		
+		public PAVControl()
+		{
+			_byteOut = new byte[0];
+		}
 		
 		@Override
 		public void run()
@@ -623,7 +633,7 @@ public class Player extends PApplet
 				
 				if(in.length == 2 && in[0].equals("!ok")) {
 					_data = new Socket(InetAddress.getByName(Config.pavHost), Integer.parseInt(in[1]));
-					_dataOut = new ObjectOutputStream(_data.getOutputStream());
+					_dataOut = new DataOutputStream(_data.getOutputStream());
 					_active = true;
 				}
 				else {
@@ -639,15 +649,24 @@ public class Player extends PApplet
 			
 			try {
 				while(true) {					
-					float[] sample = _sampleQueue.takeLast();
+					float[] frame = _sampleQueue.takeLast();
+					int frameLenBytes = frame.length * 4;
 
 					if(_sampleQueue.remainingCapacity() == 1) {
 						_sampleQueue.clear();
 					}
 					
-					_dataOut.writeObject(sample);
+					if(frameLenBytes != _byteOut.length) {
+						_byteOut = new byte[frameLenBytes];
+						_frameBuffer = ByteBuffer.wrap(_byteOut).asFloatBuffer();
+					}
+					
+					_frameBuffer.clear();
+					_frameBuffer.put(frame);
+					
+					_dataOut.writeInt(frame.length);
+					_dataOut.write(_byteOut, 0, frameLenBytes);
 					_dataOut.flush();
-					_dataOut.reset();
 				}
 			}
 			catch (InterruptedException e) { }

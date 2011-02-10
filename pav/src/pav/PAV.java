@@ -23,15 +23,18 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.BufferedReader;
+import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.ObjectInputStream;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.ByteBuffer;
+import java.nio.FloatBuffer;
 import java.util.ArrayList;
+import java.util.Deque;
+import java.util.LinkedList;
 import java.util.Map;
-import codeanticode.glgraphics.GLGraphics;
 import pav.configurator.Configurator;
 import pav.configurator.ConfiguratorFactory;
 import pav.lib.PAVException;
@@ -49,6 +52,7 @@ import pav.lib.visualizer.Visualizer;
 import pav.lib.visualizer.Waveform;
 import processing.core.PApplet;
 import processing.core.PFont;
+import codeanticode.glgraphics.GLGraphics;
 
 /**
  * Processing Audio Visualization.
@@ -57,6 +61,8 @@ import processing.core.PFont;
  */
 public class PAV extends PApplet
 {
+	private static final int _frameDropUpdateInterval = 200;
+	
 	private static final long serialVersionUID = 1525235544995508743L;
 	
 	private final Thread _clientConnectionThread;
@@ -64,12 +70,16 @@ public class PAV extends PApplet
 	private StringBuilder _inputBuffer;
 	private Visualization _visualization;
 	
+	private PFont _statusFont;
 	private boolean _drawStatus;
-	private final PFont _statusFont;
-	private volatile float[] _frame;
 	private int _inputHistoryPosition;
 	private final ArrayList<String> _inputHistory;
 	private final ArrayList<Configurator> _configurators;
+	private final Deque<float[]> _sampleQueue;
+	
+	private float _frameDropPercentage;
+	private int _numFramesVisualized;
+	private volatile int _numFramesReceived;
 	
 	/**
 	 * Ctor.
@@ -79,12 +89,11 @@ public class PAV extends PApplet
 	public PAV() throws IOException
 	{
 		_drawStatus = true;
-		_frame = new float[1024];
-		_statusFont = createFont("sans", 12, true);
 		_inputBuffer = new StringBuilder();
 		_inputHistory = new ArrayList<String>();
 		_configurators = new ArrayList<Configurator>();
 		_configurators.add(ConfiguratorFactory.generic());
+		_sampleQueue = new LinkedList<float[]>();
 		
 		_clientConnection = new ClientConnection(Config.port);
 		_clientConnectionThread = new Thread(_clientConnection, "ClientConnection");
@@ -100,6 +109,10 @@ public class PAV extends PApplet
 		size(Config.windowWidth, Config.windowHeight, Config.renderer);
 		background(0);
 		noLoop();
+		
+		_statusFont = createFont("sans", 12, true);
+		textFont(_statusFont);
+		textSize(12);
 
 		frame.setResizable(Config.windowResizable);
 		frame.setTitle("PAV");
@@ -137,15 +150,38 @@ public class PAV extends PApplet
 	public void draw()
 	{
 		background(0);
-
-		try {
-			_visualization.process(_frame);
-		}
-		catch (PAVException e) {
-			Console.error("An error occured while drawing the visualization:");
-			Console.error(e.getMessage());
+		float[] frame = null;
+		
+		synchronized(_sampleQueue) {
+			int len = _sampleQueue.size();
+			frame = _sampleQueue.pollLast();
+			_numFramesReceived += len;
+			
+			if(len > 1) {
+				_sampleQueue.clear();
+			}
 		}
 		
+		if(frame != null) {
+			_numFramesVisualized++;
+			
+			try {
+				_visualization.process(frame);
+			}
+			catch (PAVException e) {
+				Console.error("An error occured while drawing the visualization:");
+				Console.error(e.getMessage());
+				exit();
+			}
+		}
+		
+		if(frameCount % _frameDropUpdateInterval == 0) {
+			_frameDropPercentage = (_numFramesReceived - _numFramesVisualized) / 2f;
+			_numFramesVisualized = 0;
+			_numFramesReceived = 0;
+			redraw();
+		}
+
 		_drawInput();
 		
 		if(_drawStatus) {
@@ -179,8 +215,6 @@ public class PAV extends PApplet
 		}
 		
 		textAlign(RIGHT, BOTTOM);
-		textFont(_statusFont);
-		textSize(12);
 		fill(0xFF00FF00);
 		text("Input: '" + _inputBuffer.toString() + "'", width - 10, height - 10);
 	}
@@ -188,11 +222,13 @@ public class PAV extends PApplet
 	private void _drawStatus()
 	{
 		textAlign(RIGHT, TOP);
-		textFont(_statusFont);
-		textSize(12);
 		
 		int x = width - 10;
 		int y = 10;
+		
+		fill(0xFFAAAA00);
+		text("Frame drop pct: " + _frameDropPercentage, x, y);
+		y += 20;
 				
 		if(_visualization.numVisualizers() == 0) {
 			fill(0xFFFF0000);
@@ -290,7 +326,6 @@ public class PAV extends PApplet
 		}
 		
 		_inputBuffer = new StringBuilder();
-		
 		redraw();
 	}
 	
@@ -417,7 +452,7 @@ public class PAV extends PApplet
 		
 		return false;
 	}
-
+	
 	/**
 	 * Handles connections with clients.
 	 * 
@@ -565,14 +600,34 @@ public class PAV extends PApplet
 			@Override
 			public void run()
 			{
-				ObjectInputStream in = null;
-
+				DataInputStream in = null;
+				FloatBuffer frameBuffer = null;
+				byte[] byteIn = new byte[0];
+				float[] frame = new float[0];
+				
 				try {
 					_socket = _serverSocket.accept();
-					in = new ObjectInputStream(_socket.getInputStream());
+					in = new DataInputStream(_socket.getInputStream());
 
 					while(true) {
-						_frame = (float[]) in.readObject();
+						int frameLen = in.readInt();
+						int frameLenBytes = frameLen * 4;
+						
+						if(byteIn.length != frameLenBytes) {
+							byteIn = new byte[frameLenBytes];
+							frameBuffer = ByteBuffer.wrap(byteIn).asFloatBuffer();
+							frame = new float[frameLen];
+						}
+						
+						in.readFully(byteIn);
+						
+						frameBuffer.clear();
+						frameBuffer.get(frame, 0, frameLen);
+						
+						synchronized(_sampleQueue) {
+							_sampleQueue.addLast(frame);
+						}
+						
 						redraw();
 					}
 				}
