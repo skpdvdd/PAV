@@ -229,7 +229,7 @@ public class PAV extends PApplet
 		int y = 10;
 		
 		fill(0xFFAAAA00);
-		text("Frame drop pct: " + _frameDropPercentage, x, y);
+		text("Frames dropped: " + _frameDropPercentage + "%", x, y);
 		y += 20;
 				
 		if(_visualization.numVisualizers() == 0) {

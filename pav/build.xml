@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<project name="pav" basedir=".">
+<project name="pav" basedir="." default="run-sw">
 	<property name="src.dir" value="src"/>
 	<property name="build.dir" value="build"/>
 	<property name="lib.dir" value="lib"/>
@@ -27,7 +27,7 @@
 		<jar destfile="${jar.dir}/${ant.project.name}.jar" basedir="${classes.dir}"/>
     </target>
     
-    <target name="run-safe" depends="jar">
+    <target name="run-sw" depends="jar">
     	<java fork="true" classname="${main-class}">
     		<classpath>
     			<path refid="classpath"/>
