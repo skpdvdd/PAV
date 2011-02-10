@@ -32,9 +32,10 @@ import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
-import java.util.Deque;
-import java.util.LinkedList;
 import java.util.Map;
+import java.util.concurrent.BlockingDeque;
+import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.TimeUnit;
 import pav.configurator.Configurator;
 import pav.configurator.ConfiguratorFactory;
 import pav.lib.PAVException;
@@ -75,7 +76,7 @@ public class PAV extends PApplet
 	private int _inputHistoryPosition;
 	private final ArrayList<String> _inputHistory;
 	private final ArrayList<Configurator> _configurators;
-	private final Deque<float[]> _sampleQueue;
+	private final BlockingDeque<float[]> _sampleQueue;
 	
 	private float _frameDropPercentage;
 	private int _numFramesVisualized;
@@ -93,7 +94,7 @@ public class PAV extends PApplet
 		_inputHistory = new ArrayList<String>();
 		_configurators = new ArrayList<Configurator>();
 		_configurators.add(ConfiguratorFactory.generic());
-		_sampleQueue = new LinkedList<float[]>();
+		_sampleQueue = new LinkedBlockingDeque<float[]>();
 		
 		_clientConnection = new ClientConnection(Config.port);
 		_clientConnectionThread = new Thread(_clientConnection, "ClientConnection");
@@ -108,8 +109,8 @@ public class PAV extends PApplet
 	{
 		size(Config.windowWidth, Config.windowHeight, Config.renderer);
 		background(0);
-		noLoop();
-		
+		frameRate(100);
+
 		_statusFont = createFont("sans", 12, true);
 		textFont(_statusFont);
 		textSize(12);
@@ -150,36 +151,37 @@ public class PAV extends PApplet
 	public void draw()
 	{
 		background(0);
-		float[] frame = null;
-		
-		synchronized(_sampleQueue) {
-			int len = _sampleQueue.size();
-			frame = _sampleQueue.pollLast();
-			_numFramesReceived += len;
+	
+		try {
+			float[] frame = _sampleQueue.pollLast(66, TimeUnit.MILLISECONDS);
 			
-			if(len > 1) {
-				_sampleQueue.clear();
+			if(frame != null) {
+				int len = _sampleQueue.size();
+				
+				if(len > 0) {
+					_sampleQueue.clear();
+				}
+				
+				_numFramesReceived += len + 1;
+				
+				_numFramesVisualized++;
+				_visualization.process(frame);	
 			}
 		}
-		
-		if(frame != null) {
-			_numFramesVisualized++;
-			
-			try {
-				_visualization.process(frame);
-			}
-			catch (PAVException e) {
-				Console.error("An error occured while drawing the visualization:");
-				Console.error(e.getMessage());
-				exit();
-			}
+		catch(InterruptedException e) {
+			System.out.println("ir");
+			return;
+		}
+		catch (PAVException e) {
+			Console.error("An error occured while drawing the visualization:");
+			Console.error(e.getMessage());
+			exit();
 		}
 		
 		if(frameCount % _frameDropUpdateInterval == 0) {
 			_frameDropPercentage = (_numFramesReceived - _numFramesVisualized) / 2f;
 			_numFramesVisualized = 0;
 			_numFramesReceived = 0;
-			redraw();
 		}
 
 		_drawInput();
@@ -263,7 +265,6 @@ public class PAV extends PApplet
 	{
 		if(_inputBuffer.length() == 0 && key == 's') {
 			_drawStatus = !_drawStatus;
-			redraw();
 			return;
 		}
 		
@@ -271,7 +272,6 @@ public class PAV extends PApplet
 			if(! _inputHistory.isEmpty()) {
 				_inputHistoryPosition = (_inputHistoryPosition == 0) ? _inputHistory.size() - 1 : _inputHistoryPosition - 1;
 				_inputBuffer = new StringBuilder(_inputHistory.get(_inputHistoryPosition));
-				redraw();
 			}
 			
 			return;
@@ -286,7 +286,6 @@ public class PAV extends PApplet
 				}
 				
 				_inputBuffer = new StringBuilder(_inputHistory.get(_inputHistoryPosition));
-				redraw();
 			}
 			
 			return;
@@ -295,7 +294,6 @@ public class PAV extends PApplet
 		if(keyCode == 8) {
 			if(_inputBuffer.length() > 0) {
 				_inputBuffer.deleteCharAt(_inputBuffer.length() - 1);
-				redraw();
 			}
 	
 			return;
@@ -303,7 +301,6 @@ public class PAV extends PApplet
 		
 		if(keyCode != 10) {
 			_inputBuffer.append(key);
-			redraw();
 			return;
 		}
 		
@@ -326,7 +323,6 @@ public class PAV extends PApplet
 		}
 		
 		_inputBuffer = new StringBuilder();
-		redraw();
 	}
 	
 	private boolean _addVisualizer(String[] in)
@@ -467,6 +463,7 @@ public class PAV extends PApplet
 		private Thread _dataStreamThread;
 		private PrintWriter _out;
 		private BufferedReader _in;
+		private volatile boolean _done;
 		private volatile boolean _isConnected;
 
 		/**
@@ -493,7 +490,7 @@ public class PAV extends PApplet
 		@Override
 		public void run()
 		{
-			while(! Thread.interrupted() && ! _serverSocket.isClosed()) {
+			while(! _done) {
 				try {
 					_socket = _serverSocket.accept();
 					_out = new PrintWriter(_socket.getOutputStream(), true);
@@ -525,7 +522,9 @@ public class PAV extends PApplet
 					}
 				}
 				catch (IOException e) {
-					Console.out("An error occured while communicating with the client ... closing connection.");
+					if(! _done) {
+						Console.out("An error occured while communicating with the client ... closing connection.");
+					}
 				}
 				finally {
 					_isConnected = false;
@@ -536,8 +535,7 @@ public class PAV extends PApplet
 			try {
 				_serverSocket.close();
 			}
-			catch (IOException e) {
-			}
+			catch (IOException e) { }
 		}
 
 		/**
@@ -545,16 +543,15 @@ public class PAV extends PApplet
 		 */
 		public void close()
 		{
-			try {
-				_serverSocket.close();
-				if(_socket != null) _socket.close();
-			}
-			catch (IOException e) { }
+			_done = true;
+			_closeAll();
 		}
 
 		private void _closeAll()
 		{
-			if(_dataStream != null) _dataStream.close();
+			if(_dataStream != null) {
+				_dataStream.close();
+			}
 
 			if(_out != null) {
 				_out.println("!close");
@@ -573,6 +570,7 @@ public class PAV extends PApplet
 		private class DataStream implements Runnable
 		{
 			private Socket _socket;
+			private volatile boolean _done;
 			private final ServerSocket _serverSocket;
 
 			/**
@@ -609,7 +607,7 @@ public class PAV extends PApplet
 					_socket = _serverSocket.accept();
 					in = new DataInputStream(_socket.getInputStream());
 
-					while(true) {
+					while(! _done) {
 						int frameLen = in.readInt();
 						int frameLenBytes = frameLen * 4;
 						
@@ -624,18 +622,22 @@ public class PAV extends PApplet
 						frameBuffer.clear();
 						frameBuffer.get(frame, 0, frameLen);
 						
-						synchronized(_sampleQueue) {
-							_sampleQueue.addLast(frame);
-						}
-						
-						redraw();
+						_sampleQueue.addLast(frame);
 					}
 				}
 				catch (Exception e) {
-					Console.error("Error while reading frame data from the client ... closing connection.");
+					if(! _done) {
+						Console.error("Error while reading frame data from the client ... closing connection.");
+					}
 				}
 				finally {
-					if(in != null) try { in.close(); } catch(IOException e) { }
+					if(in != null) {
+						try {
+							in.close();
+						}
+						catch(IOException e) { }
+					}
+					
 					_closeAll();
 				}
 			}
@@ -645,6 +647,7 @@ public class PAV extends PApplet
 			 */
 			public void close()
 			{
+				_done = true;
 				_closeAll();
 			}
 			
