@@ -115,6 +115,7 @@ public class MelSpectrum extends VisualizerAbstract
 	public void setNumBands(int num)
 	{
 		_numBands = num;
+		_vMax = 0;
 	}
 	
 	/**
