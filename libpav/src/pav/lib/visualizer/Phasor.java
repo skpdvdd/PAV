@@ -150,7 +150,16 @@ public class Phasor extends VisualizerAbstract
 	@Override
 	public String toString()
 	{
-		return "Phasor";
+		switch(_mode) {
+			case MODE_DOTS :
+				return "Phasor (dot mode)";
+			case MODE_LINES :
+				return "Phasor (line mode)";
+			case MODE_CURVES :
+				return "Phasor (curve mode)";
+			default :
+				return "Phasor";
+		}
 	}
 	
 	@Override
