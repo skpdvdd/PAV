@@ -1,6 +1,6 @@
 <filter name="Bubble blur">
     <description>Blur filter used in the Bubbles visualizer</description>
-    <fragment>blur.glsl</fragment>
+    <fragment>BubblesBlur.glsl</fragment>
     <textures input="2" output="1">
         <intexture type="sampler2d" name="Tex" offset="Offset" label="Input image">0</intexture>
         <intexture type="sampler2d" name="Age" label="Age texture">1</intexture>

@@ -31,8 +31,6 @@ import codeanticode.glgraphics.GLGraphicsOffScreen;
 import codeanticode.glgraphics.GLTexture;
 import codeanticode.glgraphics.GLTextureFilter;
 
-//TODO vm crashes when initialized with a PApplet that has already executed the draw() method
-
 /**
  * Generates bubbles based on sound. Requires GLGraphics render mode.
  * 
@@ -45,7 +43,7 @@ public class Bubbles extends VisualizerAbstract
 	private Generator _generator;
 	private GLGraphicsOffScreen _active, _done;
 	private GLTexture _history, _age, _temp, _temp2;
-	private GLTextureFilter _blur, _blend, _bloom, _ageUpdate;
+	private GLTextureFilter _blur, _blend, _ageUpdate, _bloom;
 	
 	private final Random _random;
 	private final LinkedList<Bubble> _bubbles, _finished;
@@ -73,7 +71,7 @@ public class Bubbles extends VisualizerAbstract
 		setDarkenFactor(12);
 		setBubbleSize(0.02f, 0.06f);
 		setSpawnRate(0.3f, 1.5f);
-		setColor(new float[] { 0, 0.5f, 1 }, new int[] { 0xFFFF0000, 0xFFFFC800, 0xFF00FF00 }, PApplet.RGB);
+		setColor(new float[] { 0, 0.33f, 0.66f, 1 }, new int[] { 0xFF00FF00, 0xFFFFFF00, 0xFFFF0000, 0xFFFF00FF }, PApplet.RGB);
 	}
 	
 	/**
@@ -139,20 +137,20 @@ public class Bubbles extends VisualizerAbstract
 		_done = null;
 		_active = null;
 		
-		_blur = ShaderManager.getTextureFilter("bubbles-blur");
+		_blur = ShaderManager.getTextureFilter("BubblesBlur");
 		
-		_blend = ShaderManager.getTextureFilter("bubbles-blend");
+		_blend = ShaderManager.getTextureFilter("BubblesBlend");
 		_blend.setParameterValue("EmphBase", 0.1f);
 		_blend.setParameterValue("EmphBlend", 0.15f);
-		
-		_bloom = ShaderManager.getTextureFilter("common-bloom");
-		_bloom.setParameterValue("T1", 1.25f);
-		_bloom.setParameterValue("T2", 3f);
-		_bloom.setParameterValue("Intensity", 0.7f);
-		_bloom.setParameterValue("LumaCoeffs", new float[] { 0.5f, 0.5f, 0.5f, 1.0f });
-		
-		_ageUpdate = ShaderManager.getTextureFilter("bubbles-ageupdate");
+				
+		_ageUpdate = ShaderManager.getTextureFilter("AgeUpdate");
 		_ageUpdate.setParameterValue("Add", 0.05f);
+		
+		_bloom = ShaderManager.getTextureFilter("BubblesBloom");
+		_bloom.setParameterValue("T1", 1.5f);
+		_bloom.setParameterValue("T2", 2.5f);
+		_bloom.setParameterValue("Intensity", 0.6f);
+		_bloom.setParameterValue("LumaCoeffs", new float[] { 0.5f, 0.5f, 0.5f, 1f });
 	}
 	
 	@Override
@@ -353,7 +351,9 @@ public class Bubbles extends VisualizerAbstract
 				float x = _cx();
 				float y = _cy();
 				
-				int c = cm.map(x);
+				float co = ((float) _random.nextGaussian()) * _width / 8f;
+				
+				int c = cm.map(x + co);
 				int cr = c >> 16 & 0xFF;
 				int cg = c >> 8 & 0xFF;
 				int cb = c & 0xFF;
@@ -469,7 +469,7 @@ public class Bubbles extends VisualizerAbstract
 				
 				_active.beginDraw();;
 				_active.fill(_c);
-				_done.strokeWeight(_sw);
+				_active.strokeWeight(_sw);
 				_active.stroke(p.color(_cr, _cg, _cb, ca));
 				_active.ellipse(_cx, _cy, r, r);
 				_active.endDraw();
