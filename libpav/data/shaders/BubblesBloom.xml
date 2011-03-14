@@ -1,6 +1,6 @@
 <filter name="Bloom effect">
     <description>Adds a bloom effect by increasing the intensity of bright colors</description>
-    <fragment>bloom.glsl</fragment>
+    <fragment>BubblesBloom.glsl</fragment>
     <textures input="1" output="1">
         <intexture type="sampler2d" name="tex" label="input image">0</intexture>
     </textures>

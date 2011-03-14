@@ -19,8 +19,9 @@
 
 package pav.lib;
 
+import java.io.File;
+import java.io.FilenameFilter;
 import java.util.HashMap;
-import java.util.Map;
 import processing.core.PApplet;
 import codeanticode.glgraphics.GLGraphics;
 import codeanticode.glgraphics.GLTextureFilter;
@@ -32,7 +33,7 @@ import codeanticode.glgraphics.GLTextureFilter;
  */
 public class ShaderManager
 {
-	private static Map<String, GLTextureFilter> _textureFilters;
+	private static HashMap<String, GLTextureFilter> _textureFilters;
 	
 	/**
 	 * Initializes the shaders. Must be called before initializing any visualizers.
@@ -42,15 +43,31 @@ public class ShaderManager
 	 */
 	public static void initialize(PApplet p) throws PAVException
 	{
+		_textureFilters = new HashMap<String, GLTextureFilter>();
+		
 		if(! (p.g instanceof GLGraphics)) {
 			throw new PAVException("Shaders are only supported under the GLGraphics renderer.");
 		}
-		
-		_textureFilters = new HashMap<String, GLTextureFilter>();
-		_textureFilters.put("bubbles-blur", new GLTextureFilter(p, "shaders/bubbles/blur.xml"));
-		_textureFilters.put("bubbles-ageupdate", new GLTextureFilter(p, "shaders/bubbles/ageupdate.xml"));
-		_textureFilters.put("bubbles-blend", new GLTextureFilter(p, "shaders/bubbles/blend.xml"));
-		_textureFilters.put("common-bloom", new GLTextureFilter(p, "shaders/common/bloom.xml"));
+				
+	    File s = new File("data/shaders");
+	    
+	    if(s.canRead()) {
+	    	String[] shaders = s.list(new FilenameFilter()
+			{
+				@Override
+				public boolean accept(File dir, String name)
+				{
+					return new File(dir, name).isFile() && name.toLowerCase().endsWith(".xml");
+				}
+			});
+	    	
+	    	for(String shader : shaders) {
+	    		_textureFilters.put(shader.substring(0, shader.length() - 4), new GLTextureFilter(p, "shaders/" + shader));
+	    	}
+	    }
+	    else {
+	    	throw new PAVException("No shaders found.");
+	    }
 	}
 	
 	/**

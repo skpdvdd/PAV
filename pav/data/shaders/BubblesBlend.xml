@@ -1,6 +1,6 @@
 <filter name="Bubble blend">
     <description>Blend effect used in the Bubbles visualizer</description>
-    <fragment>blend.glsl</fragment>
+    <fragment>BubblesBlend.glsl</fragment>
     <textures input="2" output="1">
         <intexture type="sampler2d" name="Base" label="The texture holding the old bubbles">0</intexture>
         <intexture type="sampler2d" name="Blend" label="The texture holding the new bubbles">1</intexture>                      
