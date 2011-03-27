@@ -22,20 +22,16 @@ package pav;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
-import java.io.BufferedReader;
-import java.io.DataInputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
-import java.net.ServerSocket;
-import java.net.Socket;
-import java.nio.ByteBuffer;
-import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.TimeUnit;
+import pav.audiosource.AudioCallback;
+import pav.audiosource.AudioSource;
+import pav.audiosource.MPDAudioSource;
+import pav.audiosource.SocketAudioSource;
 import pav.configurator.Configurator;
 import pav.configurator.ConfiguratorFactory;
 import pav.lib.PAVException;
@@ -60,16 +56,16 @@ import codeanticode.glgraphics.GLGraphics;
  * 
  * @author christopher
  */
-public class PAV extends PApplet
+public class PAV extends PApplet implements AudioCallback
 {
 	private static final int _frameDropUpdateInterval = 200;
 	
 	private static final long serialVersionUID = 1525235544995508743L;
 	
-	private final Thread _clientConnectionThread;
-	private final ClientConnection _clientConnection;
 	private StringBuilder _inputBuffer;
 	private Visualization _visualization;
+	private AudioSource _audioSource;
+	private volatile String[] _audioSourceInfo;
 	
 	private PFont _statusFont;
 	private boolean _drawStatus;
@@ -87,7 +83,7 @@ public class PAV extends PApplet
 	 * 
 	 * @throws IOException If an error occured while initializing the ControlStream.
 	 */
-	public PAV() throws IOException
+	public PAV()
 	{
 		_drawStatus = true;
 		_inputBuffer = new StringBuilder();
@@ -95,10 +91,7 @@ public class PAV extends PApplet
 		_configurators = new ArrayList<Configurator>();
 		_configurators.add(ConfiguratorFactory.generic());
 		_sampleQueue = new LinkedBlockingDeque<float[]>();
-		
-		_clientConnection = new ClientConnection(Config.port);
-		_clientConnectionThread = new Thread(_clientConnection, "ClientConnection");
-		_clientConnectionThread.start();
+		_audioSourceInfo = new String[0];
 	}
 
 	/**
@@ -142,6 +135,19 @@ public class PAV extends PApplet
 			}
 			catch(PAVException e) { }
 		}
+		
+		try {
+			if(Config.audioSource.equals(Config.AUDIO_SOURCE_SOCKET)) {
+				_audioSource = new SocketAudioSource(this);
+			}
+			else {
+				_audioSource = new MPDAudioSource(this);
+			}
+		}
+		catch(Exception e) {
+			Console.error("Error while initializing audio source:");
+			Console.error(e);
+		}
 	}
 
 	/**
@@ -169,7 +175,7 @@ public class PAV extends PApplet
 			}
 		}
 		catch(InterruptedException e) {
-			System.out.println("ir");
+			System.out.println("Interrupted while waiting for new data ... aborting.");
 			return;
 		}
 		catch (PAVException e) {
@@ -199,15 +205,114 @@ public class PAV extends PApplet
 	{
 		Console.out("Shutting down ...");
 
-		_clientConnectionThread.interrupt();
-		_clientConnection.close();
-
 		try {
-			_clientConnectionThread.join(500);
+			_audioSource.close();
 		}
-		catch (InterruptedException e) { }
-
+		catch(InterruptedException e) { }
+		
 		super.exit();
+	}
+	
+	@Override
+	public void keyPressed()
+	{
+		if(_inputBuffer.length() == 0 && key == 's') {
+			_drawStatus = !_drawStatus;
+			return;
+		}
+		
+		if(_inputBuffer.length() == 0 && key == 'p') {
+			saveFrame("pav-####.png");
+			return;
+		}
+		
+		if(keyCode == 38) {
+			if(! _inputHistory.isEmpty()) {
+				_inputHistoryPosition = (_inputHistoryPosition == 0) ? _inputHistory.size() - 1 : _inputHistoryPosition - 1;
+				_inputBuffer = new StringBuilder(_inputHistory.get(_inputHistoryPosition));
+			}
+			
+			return;
+		}
+		
+		if(keyCode == 40) {
+			if(! _inputHistory.isEmpty()) {
+				if(_inputHistoryPosition == _inputHistory.size() - 1) {
+					_inputHistoryPosition = 0;
+					_inputBuffer = new StringBuilder();
+				}
+				else {
+					_inputHistoryPosition++;
+					_inputBuffer = new StringBuilder(_inputHistory.get(_inputHistoryPosition));
+				}		
+			}
+			
+			return;
+		}
+		
+		if(keyCode == 8) {
+			if(_inputBuffer.length() > 0) {
+				_inputBuffer.deleteCharAt(_inputBuffer.length() - 1);
+			}
+	
+			return;
+		}
+		
+		if(keyCode != 10) {
+			_inputBuffer.append(key);
+			return;
+		}
+		
+		boolean valid = false;
+		String[] in = _inputBuffer.toString().split(" ");
+
+		if(in[0].equals("add") && in.length >= 2) {
+			valid = _addVisualizer(Util.removeFirst(in));
+		}
+		else if(in[0].equals("rem") && in.length == 2) {
+			valid = _removeVisualizer(in[1]);
+		}
+		else if(in[0].equals("c") && _inputBuffer.length() > 2) {
+			valid = _configureVisualizer(_inputBuffer.substring(2, _inputBuffer.length()));
+		}
+		
+		if(valid) {
+			_inputHistory.add(_inputBuffer.toString());
+			_inputHistoryPosition = 0;
+		}
+		
+		_inputBuffer = new StringBuilder();
+	}
+	
+	@Override
+	public void onNewFrame(float[] frame)
+	{
+		_sampleQueue.add(frame);
+	}
+
+	@Override
+	public void onSongChanged()
+	{
+		//TODO implement
+	}
+	
+	@Override
+	public void onSampleRateChanged(int sampleRate)
+	{
+		_visualization.setSampleRate(sampleRate);
+	}
+
+	@Override
+	public void onStatusChanged(String[] info)
+	{
+		_audioSourceInfo = info;
+	}
+
+	@Override
+	public void onError(Throwable error)
+	{
+		_audioSourceInfo = new String[] { "AudioSource Error: " + error.getMessage() };
+		Console.error(error);
 	}
 	
 	private void _drawInput()
@@ -246,9 +351,10 @@ public class PAV extends PApplet
 			}
 		}
 		
-		if(! _clientConnection.isConnected()) {
-			fill(0xFFFF0000);
-			text("No client connection.", x ,y);
+		fill(0xFFFF0000);
+		
+		for(String s : _audioSourceInfo) {
+			text(s, x, y);
 			y += 20;
 		}
 		
@@ -258,71 +364,6 @@ public class PAV extends PApplet
 		
 		fill(255);
 		text("Type 's' to toggle this information.", x, y);
-	}
-	
-	@Override
-	public void keyPressed()
-	{
-		if(_inputBuffer.length() == 0 && key == 's') {
-			_drawStatus = !_drawStatus;
-			return;
-		}
-		
-		if(keyCode == 38) {
-			if(! _inputHistory.isEmpty()) {
-				_inputHistoryPosition = (_inputHistoryPosition == 0) ? _inputHistory.size() - 1 : _inputHistoryPosition - 1;
-				_inputBuffer = new StringBuilder(_inputHistory.get(_inputHistoryPosition));
-			}
-			
-			return;
-		}
-		
-		if(keyCode == 40) {
-			if(! _inputHistory.isEmpty()) {
-				_inputHistoryPosition++;
-				
-				if(_inputHistoryPosition > _inputHistory.size() - 1) {
-					_inputHistoryPosition = 0;
-				}
-				
-				_inputBuffer = new StringBuilder(_inputHistory.get(_inputHistoryPosition));
-			}
-			
-			return;
-		}
-		
-		if(keyCode == 8) {
-			if(_inputBuffer.length() > 0) {
-				_inputBuffer.deleteCharAt(_inputBuffer.length() - 1);
-			}
-	
-			return;
-		}
-		
-		if(keyCode != 10) {
-			_inputBuffer.append(key);
-			return;
-		}
-		
-		boolean valid = false;
-		String[] in = _inputBuffer.toString().split(" ");
-
-		if(in[0].equals("add") && in.length >= 2) {
-			valid = _addVisualizer(Util.removeFirst(in));
-		}
-		else if(in[0].equals("rem") && in.length == 2) {
-			valid = _removeVisualizer(in[1]);
-		}
-		else if(in[0].equals("c") && _inputBuffer.length() > 2) {
-			valid = _configureVisualizer(_inputBuffer.substring(2, _inputBuffer.length()));
-		}
-		
-		if(valid) {
-			_inputHistory.add(_inputBuffer.toString());
-			_inputHistoryPosition = 0;
-		}
-		
-		_inputBuffer = new StringBuilder();
 	}
 	
 	private boolean _addVisualizer(String[] in)
@@ -447,215 +488,5 @@ public class PAV extends PApplet
 		}
 		
 		return false;
-	}
-	
-	/**
-	 * Handles connections with clients.
-	 * 
-	 * @author christopher
-	 */
-	private class ClientConnection implements Runnable
-	{
-		private final ServerSocket _serverSocket;
-
-		private Socket _socket;
-		private DataStream _dataStream;
-		private Thread _dataStreamThread;
-		private PrintWriter _out;
-		private BufferedReader _in;
-		private volatile boolean _done;
-		private volatile boolean _isConnected;
-
-		/**
-		 * Ctor.
-		 * 
-		 * @param port The port to listen to for new connections
-		 * @throws IOException If an error occured while setting up the ServerSocket
-		 */
-		public ClientConnection(int port) throws IOException
-		{
-			_serverSocket = new ServerSocket(port, 0);
-		}
-		
-		/**
-		 * Returns true if a client connection is established, otherwise false.
-		 * 
-		 * @return True if there is a client connection
-		 */
-		public boolean isConnected()
-		{
-			return _isConnected;
-		}
-
-		@Override
-		public void run()
-		{
-			while(! _done) {
-				try {
-					_socket = _serverSocket.accept();
-					_out = new PrintWriter(_socket.getOutputStream(), true);
-					_in = new BufferedReader(new InputStreamReader(_socket.getInputStream()));
-
-					_dataStream = new DataStream();
-					_dataStreamThread = new Thread(_dataStream, "DataStream");
-					_dataStreamThread.start();
-					_out.println("!ok " + _dataStream.getLocalPort());
-
-					_isConnected = true;
-					String line = null;
-
-					while((line = _in.readLine()) != null) {
-						String[] in = line.split(" ");
-
-						if(in[0].equals("!close")) {
-							break;
-						}
-
-						if(in[0].equals("!sr")) {
-							try {
-								_visualization.setSampleRate(Integer.parseInt(in[1]));
-							}
-							catch (Exception e) {
-								_out.println("!err");
-							}
-						}
-					}
-				}
-				catch (IOException e) {
-					if(! _done) {
-						Console.out("An error occured while communicating with the client ... closing connection.");
-					}
-				}
-				finally {
-					_isConnected = false;
-					_closeAll();
-				}
-			}
-
-			try {
-				_serverSocket.close();
-			}
-			catch (IOException e) { }
-		}
-
-		/**
-		 * Closes the connection.
-		 */
-		public void close()
-		{
-			_done = true;
-			_closeAll();
-		}
-
-		private void _closeAll()
-		{
-			if(_dataStream != null) {
-				_dataStream.close();
-			}
-
-			if(_out != null) {
-				_out.println("!close");
-				_out.close();
-			}
-
-			if(_in != null) try { _in.close(); } catch (IOException e) { }
-			if(_socket != null) try { _socket.close(); } catch (IOException e) { }
-		}
-		
-		/**
-		 * Represents a data stream from the client.
-		 * 
-		 * @author christopher
-		 */
-		private class DataStream implements Runnable
-		{
-			private Socket _socket;
-			private volatile boolean _done;
-			private final ServerSocket _serverSocket;
-
-			/**
-			 * Ctor.
-			 * 
-			 * Creates a new ServerSocket that listens to any free port.
-			 * 
-			 * @throws IOException If an error occured while initializing the ServerSocket
-			 */
-			public DataStream() throws IOException
-			{
-				_serverSocket = new ServerSocket(0, 0);
-			}
-
-			/**
-			 * Returns the port the ServerSocket listens to.
-			 * 
-			 * @return The port
-			 */
-			public int getLocalPort()
-			{
-				return _serverSocket.getLocalPort();
-			}
-
-			@Override
-			public void run()
-			{
-				DataInputStream in = null;
-				FloatBuffer frameBuffer = null;
-				byte[] byteIn = new byte[0];
-				float[] frame = new float[0];
-				
-				try {
-					_socket = _serverSocket.accept();
-					in = new DataInputStream(_socket.getInputStream());
-
-					while(! _done) {
-						int frameLen = in.readInt();
-						int frameLenBytes = frameLen * 4;
-						
-						if(byteIn.length != frameLenBytes) {
-							byteIn = new byte[frameLenBytes];
-							frameBuffer = ByteBuffer.wrap(byteIn).asFloatBuffer();
-							frame = new float[frameLen];
-						}
-						
-						in.readFully(byteIn);
-						
-						frameBuffer.clear();
-						frameBuffer.get(frame, 0, frameLen);
-						
-						_sampleQueue.addLast(frame);
-					}
-				}
-				catch (Exception e) {
-					if(! _done) {
-						Console.error("Error while reading frame data from the client ... closing connection.");
-					}
-				}
-				finally {
-					if(in != null) {
-						try {
-							in.close();
-						}
-						catch(IOException e) { }
-					}
-					
-					_closeAll();
-				}
-			}
-
-			/**
-			 * Closes the connection.
-			 */
-			public void close()
-			{
-				_done = true;
-				_closeAll();
-			}
-			
-			private void _closeAll()
-			{
-				try { _serverSocket.close(); } catch (IOException e) { }
-				if(_socket != null) try { _socket.close(); } catch (IOException e) { }
-			}
-		}
 	}
 }

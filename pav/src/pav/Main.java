@@ -46,29 +46,46 @@ public class Main
 	private static void _initConfig(String[] args)
 	{
 		Options options = new Options();
-		options.addOption("port", true, "The port of the RMI registry.");
 		options.addOption("renderer", true, "The Processing render mode to use.");
 		options.addOption("width", true, "The width of the visualization window.");
 		options.addOption("height", true, "The height of the visualization window.");
 		options.addOption("resizable", false, "Whether the visualization window is resizable.");
+		options.addOption("audiosource", true, "The audio source to use (socket or mpd).");
+		options.addOption("fifo", true, "The path to the fifo the mpd audio source should use.");
+		options.addOption("port", true, "The port the socket audio source should listen to.");
 		
 		CommandLineParser parser = new GnuParser();
 		
 		try {
 			CommandLine cmd = parser.parse(options, args);
 			
+			if(cmd.hasOption("audiosource")) {
+				Config.audioSource = cmd.getOptionValue("audiosource");
+			}
+			else {
+				Console.out("No audio source specified, using " + Config.audioSource + ".");
+			}
+			
+			if(cmd.hasOption("renderer")) {
+				Config.renderer = cmd.getOptionValue("renderer");
+			}
+			else {
+				Console.out("No render mode specified, using " + Config.renderer + ".");
+			}
+			
+			if(cmd.hasOption("fifo")) {
+				Config.MPDAudioSource.fifoPath = cmd.getOptionValue("fifo");
+			}
+			
 			if(cmd.hasOption("port")) {
 				String option = cmd.getOptionValue("port");
 				
 				try {
-					Config.port = Integer.parseInt(option);
+					Config.SocketAudioSource.port = Integer.parseInt(option);
 				}
 				catch(NumberFormatException e) {
 					Console.error("Error while parsing command line arguments: port is not a valid integer.");
 				}
-			}
-			else {
-				Console.out("No port specified, using " + Config.port + ".");
 			}
 			
 			if(cmd.hasOption("renderer")) {

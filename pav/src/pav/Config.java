@@ -26,13 +26,23 @@ import processing.core.PConstants;
  * 
  * @author christopher
  */
-final class Config
+public final class Config
 {
 	/**
-	 * The port to listen to for incoming connections.
+	 * Use MPD audio source.
 	 */
-	public static int port = 2198;
+	public static final String AUDIO_SOURCE_MPD = "mpd";
 	
+	/**
+	 * Use socket audio source.
+	 */
+	public static final String AUDIO_SOURCE_SOCKET = "socket";
+	
+	/**
+	 * The audio source to use.
+	 */
+	public static String audioSource = AUDIO_SOURCE_SOCKET;
+		
 	/**
 	 * The width of the display window.
 	 */
@@ -52,6 +62,32 @@ final class Config
 	 * The renderer to use.
 	 */
 	public static String renderer = PConstants.P2D;
+	
+	public static final class SocketAudioSource
+	{
+		/**
+		 * The port to listen to for incoming connections.
+		 */
+		public static int port = 2198;
+	}
+	
+	/**
+	 * MPDAudioSource config.
+	 * 
+	 * @author christopher
+	 */
+	public static final class MPDAudioSource
+	{
+		/**
+		 * The sample size;
+		 */
+		public static int sampleSize = 2048;
+		
+		/**
+		 * The path to the fifo.
+		 */
+		public static String fifoPath = "/tmp/mpd.fifo";
+	}
 	
 	private Config() { }
 }
