@@ -324,7 +324,7 @@ public class Bubbles extends VisualizerAbstract
 		{
 			_align = align;
 		}
-		
+			
 		@Override
 		public int generate()
 		{
@@ -335,19 +335,24 @@ public class Bubbles extends VisualizerAbstract
 			float rms = Frame.Descriptor.rms();
 			
 			if(rms < 0.001) return 0;
-			if(rms < _rmsMin) _rmsMin = rms; else _rmsMin += _align;
-			if(rms > _rmsMax) _rmsMax = rms; else _rmsMax -= _align;
 			
+			if(rms < _rmsMin) _rmsMin = rms; _rmsMin += _align;
+			if(rms > _rmsMax) _rmsMax = rms; else _rmsMax -= _align;;
+
 			int idx = _seq % 10;
 			float t = PApplet.constrain(PApplet.map(rms, _rmsMin, _rmsMax, 0, 1), 0, 1);
 			float spawn = PApplet.map(t, 0, 1, _lutMin[idx], _lutMax[idx]);
 			int num = (int) spawn;
 			float rem = spawn - num;
-			
+
 			if(_random.nextFloat() < rem) num++;
 
+			float rt = 1;
+			
+			if(rms < 0.1f) rt = PApplet.map(rms, 0, 0.1f, 0.25f, 1f);
+			
 			for(int i = 0; i < num; i++) {
-				float r = PApplet.map(t, 0, 1, _width * _rMin, _width * _rMax);
+				float r = PApplet.map(t * rt, 0, 1, _width * _rMin, _width * _rMax);
 				float x = _cx();
 				float y = _cy();
 				

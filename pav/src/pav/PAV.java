@@ -62,7 +62,6 @@ public class PAV extends PApplet implements AudioCallback
 	private StringBuilder _inputBuffer;
 	private Visualization _visualization;
 	private final AudioSource _audioSource;
-	private volatile String[] _audioSourceInfo;
 	
 	private PFont _statusFont;
 	private boolean _drawStatus;
@@ -88,7 +87,6 @@ public class PAV extends PApplet implements AudioCallback
 		_configurators = new ArrayList<Configurator>();
 		_configurators.add(ConfiguratorFactory.generic());
 		_sampleQueue = new LinkedBlockingDeque<float[]>();
-		_audioSourceInfo = new String[0];
 		_audioSource = AudioSource.factory(this);
 	}
 
@@ -285,15 +283,9 @@ public class PAV extends PApplet implements AudioCallback
 	}
 
 	@Override
-	public void onStatusChanged(String[] info)
-	{
-		_audioSourceInfo = info;
-	}
-
-	@Override
 	public void onError(Throwable error)
 	{
-		_audioSourceInfo = new String[] { "AudioSource Error: " + error.getMessage() };
+		Console.error("AudioSource error: " + error.getMessage());
 		Console.error(error);
 	}
 	
@@ -333,18 +325,13 @@ public class PAV extends PApplet implements AudioCallback
 			}
 		}
 		
-		fill(0xFFFF0000);
-		
-		for(String s : _audioSourceInfo) {
-			text(s, x, y);
-			y += 20;
-		}
-		
 		fill(0xFF00FF00);
 		text("Type in this window to execute commands.", x, y);
 		y += 20;
 		
 		fill(255);
+		text("Type 'p' to save a screenshot.", x, y);
+		y += 18;
 		text("Type 's' to toggle this information.", x, y);
 	}
 	

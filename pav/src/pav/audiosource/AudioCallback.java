@@ -32,14 +32,7 @@ public interface AudioCallback
 	 * @param frame The frame. Must not be null
 	 */
 	void onNewFrame(float[] frame);
-	
-	/**
-	 * Called on status changes.
-	 * 
-	 * @param status Status info
-	 */
-	void onStatusChanged(String[] status);
-	
+		
 	/**
 	 * Called on errors.
 	 * 
