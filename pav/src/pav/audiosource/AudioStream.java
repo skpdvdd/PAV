@@ -60,6 +60,11 @@ public class AudioStream implements Runnable
 		_thread.start();
 	}
 	
+	/**
+	 * Pauses the current thread until the audio stream is finished.
+	 * 
+	 * @throws InterruptedException If the thread was interrupted while waiting for the stream to finish
+	 */
 	public void waitUntilFinished() throws InterruptedException
 	{
 		_thread.join();
@@ -110,7 +115,7 @@ public class AudioStream implements Runnable
 			
 			fbuf.clear();
 			fbuf.get(frame);
-							
+			
 			_callback.onNewFrame(frame);
 		}
 	}

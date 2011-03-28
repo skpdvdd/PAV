@@ -63,6 +63,7 @@ public class SocketAudioSource extends AudioSource implements Runnable
 			
 			try {
 				Socket socket = _serverSocket.accept();
+				
 				_stream = new AudioStream(socket.getInputStream(), _callback);
 				_stream.read();
 				_callback.onStatusChanged(new String[0]);
@@ -73,7 +74,6 @@ public class SocketAudioSource extends AudioSource implements Runnable
 			}
 			catch(InterruptedException e) { }
 			finally {
-				System.out.println("in finally");
 				try { _stream.close(); } catch(InterruptedException e) { e.printStackTrace(); }
 			}
 		}
@@ -94,6 +94,6 @@ public class SocketAudioSource extends AudioSource implements Runnable
 	private void _closeAll() throws InterruptedException, IOException
 	{
 		_serverSocket.close();
-		_stream.close();
+		if(_stream != null) _stream.close();
 	}
 }

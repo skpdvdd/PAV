@@ -23,16 +23,14 @@ import java.awt.FileDialog;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
-import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.util.Collections;
 import java.util.HashMap;
@@ -602,70 +600,45 @@ public class Player extends PApplet
 	 */
 	private class PAVControl implements Runnable
 	{
-		private Socket _control, _data;
-		private PrintWriter _controlOut;
-		private BufferedReader _controlIn;
+		private Socket _data;
 		private DataOutputStream _dataOut;
-		private float _lastSampleRate;
 		private boolean _active;
-		
-		private byte[] _byteOut;
-		private FloatBuffer _frameBuffer;
-		
-		public PAVControl()
-		{
-			_byteOut = new byte[0];
-		}
-		
+
 		@Override
 		public void run()
 		{
 			if(! Config.usePav) {
 				return;
 			}
-			
+									
 			try {
-				_control = new Socket(InetAddress.getByName(Config.pavHost), Config.pavPort);
-				_controlOut = new PrintWriter(_control.getOutputStream(), true);
-				_controlIn = new BufferedReader(new InputStreamReader(_control.getInputStream()));
-				
-				String[] in = _controlIn.readLine().split(" ");
-				
-				if(in.length == 2 && in[0].equals("!ok")) {
-					_data = new Socket(InetAddress.getByName(Config.pavHost), Integer.parseInt(in[1]));
-					_dataOut = new DataOutputStream(_data.getOutputStream());
-					_active = true;
-				}
-				else {
-					throw new IOException("Received an invalid welcome message.");
-				}
+				_data = new Socket(InetAddress.getByName(Config.pavHost), Config.pavPort);
+				_dataOut = new DataOutputStream(_data.getOutputStream());
+				_active = true;
 			}
 			catch (Exception e) {
 				Console.error("An error occurred while trying to connect to PAV:");
 				Console.error(e);
-				_tryClose();
 				return;
 			}
 			
+			byte[] bb = new byte[Config.frameSize * 4];
+			ByteBuffer bbuf = ByteBuffer.wrap(bb);
+			bbuf.order(ByteOrder.LITTLE_ENDIAN);
+			FloatBuffer fbuf = bbuf.asFloatBuffer();
+			
 			try {
-				while(true) {					
+				while(! Thread.interrupted()) {					
 					float[] frame = _sampleQueue.takeLast();
-					int frameLenBytes = frame.length * 4;
 
 					if(_sampleQueue.remainingCapacity() == 1) {
 						_sampleQueue.clear();
 					}
-					
-					if(frameLenBytes != _byteOut.length) {
-						_byteOut = new byte[frameLenBytes];
-						_frameBuffer = ByteBuffer.wrap(_byteOut).asFloatBuffer();
-					}
-					
-					_frameBuffer.clear();
-					_frameBuffer.put(frame);
-					
-					_dataOut.writeInt(frame.length);
-					_dataOut.write(_byteOut, 0, frameLenBytes);
+
+					fbuf.clear();
+					fbuf.put(frame);
+
+					_dataOut.write(bb);
 					_dataOut.flush();
 				}
 			}
@@ -675,7 +648,12 @@ public class Player extends PApplet
 			}
 			finally {
 				_active = false;
-				_tryClose();
+				
+				try {
+					_dataOut.close();
+					_data.close();
+				}
+				catch(IOException e) { }
 			}
 		}
 		
@@ -692,30 +670,7 @@ public class Player extends PApplet
 		/**
 		 * Event handler - Audio playback started.
 		 */
-		public void onPlaybackStarted()
-		{
-			if(! isActive()) {
-				return;
-			}
-			
-			if(_player.sampleRate() != _lastSampleRate) {
-				_controlOut.println("!sr " + _player.sampleRate());
-				_lastSampleRate = _player.sampleRate();
-			}
-		}
-		
-		private void _tryClose()
-		{
-			if(_controlOut != null) {
-				_controlOut.println("!close");
-				_controlOut.close();
-			}
-			
-			if(_dataOut != null) try { _dataOut.close(); } catch (IOException e) { }
-			if(_data != null) try { _data.close(); } catch (IOException e) { }
-			if(_controlIn != null) try { _controlIn.close(); } catch (IOException e) { }
-			if(_control != null) try { _control.close(); } catch (IOException e) { }
-		}
+		public void onPlaybackStarted() { }
 	}
 	
 	/**
