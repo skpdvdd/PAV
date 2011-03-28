@@ -19,6 +19,7 @@
 
 package pav;
 
+import java.nio.ByteOrder;
 import processing.core.PConstants;
 
 /**
@@ -29,9 +30,9 @@ import processing.core.PConstants;
 public final class Config
 {
 	/**
-	 * Use MPD audio source.
+	 * Use FIFO audio source.
 	 */
-	public static final String AUDIO_SOURCE_MPD = "mpd";
+	public static final String AUDIO_SOURCE_FIFO = "fifo";
 	
 	/**
 	 * Use socket audio source.
@@ -39,19 +40,64 @@ public final class Config
 	public static final String AUDIO_SOURCE_SOCKET = "socket";
 	
 	/**
+	 * Samples are in int8 (2 bytes, java short) format.
+	 */
+	public static final String SAMPLE_FORMAT_INT8 = "int8";
+	
+	/**
+	 * Samples are in normalized float (4 bytes, -1 to 1) format.
+	 */
+	public static final String SAMPLE_FORMAT_FLOAT = "float";
+	
+	/**
+	 * Audio data are transfered as little-endian byte stream.
+	 */
+	public static final String BYTE_ORDER_LE = "le";
+	
+	/**
+	 * Audio data are transfered as big-endian byte stream.
+	 */
+	public static final String BYTE_ORDER_BE = "be";
+	
+	/**
 	 * The audio source to use.
 	 */
 	public static String audioSource = AUDIO_SOURCE_SOCKET;
+	
+	/**
+	 * The sample format.
+	 */
+	public static String sampleFormat = SAMPLE_FORMAT_FLOAT;
+	
+	/**
+	 * The sample size;
+	 */
+	public static int sampleSize = 1024;
+	
+	/**
+	 * The byte order.
+	 */
+	public static ByteOrder byteOrder = ByteOrder.LITTLE_ENDIAN;
+	
+	/**
+	 * The port the socket audio source should listen to.
+	 */
+	public static int socketPort = 2198;
+	
+	/**
+	 * The path to the fifo the fifo audio source should use.
+	 */
+	public static String fifoPath = "";
 		
 	/**
 	 * The width of the display window.
 	 */
-	public static int windowWidth = 800;
+	public static int windowWidth = 1024;
 	
 	/**
 	 * The height of the display window.
 	 */
-	public static int windowHeight = 600;
+	public static int windowHeight = 768;
 	
 	/**
 	 * Whether the display window is resizable.
@@ -62,32 +108,6 @@ public final class Config
 	 * The renderer to use.
 	 */
 	public static String renderer = PConstants.P2D;
-	
-	public static final class SocketAudioSource
-	{
-		/**
-		 * The port to listen to for incoming connections.
-		 */
-		public static int port = 2198;
-	}
-	
-	/**
-	 * MPDAudioSource config.
-	 * 
-	 * @author christopher
-	 */
-	public static final class MPDAudioSource
-	{
-		/**
-		 * The sample size;
-		 */
-		public static int sampleSize = 2048;
-		
-		/**
-		 * The path to the fifo.
-		 */
-		public static String fifoPath = "/tmp/mpd.fifo";
-	}
 	
 	private Config() { }
 }

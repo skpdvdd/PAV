@@ -19,6 +19,8 @@
 
 package pav;
 
+import java.io.File;
+import java.nio.ByteOrder;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.GnuParser;
@@ -38,63 +40,32 @@ public class Main
 		System.out.println("Processing Audio Visualization");
 		System.out.println("------------------------------\n");
 		
-		_initConfig(args);
-		
-		PApplet.main(new String[] {"pav.PAV"});
-	}
-	
-	private static void _initConfig(String[] args)
-	{
 		Options options = new Options();
 		options.addOption("renderer", true, "The Processing render mode to use.");
 		options.addOption("width", true, "The width of the visualization window.");
 		options.addOption("height", true, "The height of the visualization window.");
 		options.addOption("resizable", false, "Whether the visualization window is resizable.");
-		options.addOption("audiosource", true, "The audio source to use (socket or mpd).");
-		options.addOption("fifo", true, "The path to the fifo the mpd audio source should use.");
-		options.addOption("port", true, "The port the socket audio source should listen to.");
+		
+		options.addOption("audiosource", true, "Audio source to use (socket or fifo).");
+		options.addOption("sampleformat", true, "Sample format (int8 or float).");
+		options.addOption("samplesize", true, "Number of samples per frame (512, 1024 or 2048)");
+		options.addOption("byteorder", true, "Byte order of the samples (le or be)");
+		
+		options.addOption("path", true, "Path to the fifo the fifo audio source should use.");
+		options.addOption("port", true, "Port the socket audio source should listen to.");
 		
 		CommandLineParser parser = new GnuParser();
 		
 		try {
 			CommandLine cmd = parser.parse(options, args);
 			
-			if(cmd.hasOption("audiosource")) {
-				Config.audioSource = cmd.getOptionValue("audiosource");
-			}
-			else {
-				Console.out("No audio source specified, using " + Config.audioSource + ".");
-			}
-			
 			if(cmd.hasOption("renderer")) {
 				Config.renderer = cmd.getOptionValue("renderer");
 			}
 			else {
 				Console.out("No render mode specified, using " + Config.renderer + ".");
 			}
-			
-			if(cmd.hasOption("fifo")) {
-				Config.MPDAudioSource.fifoPath = cmd.getOptionValue("fifo");
-			}
-			
-			if(cmd.hasOption("port")) {
-				String option = cmd.getOptionValue("port");
-				
-				try {
-					Config.SocketAudioSource.port = Integer.parseInt(option);
-				}
-				catch(NumberFormatException e) {
-					Console.error("Error while parsing command line arguments: port is not a valid integer.");
-				}
-			}
-			
-			if(cmd.hasOption("renderer")) {
-				Config.renderer = cmd.getOptionValue("renderer");
-			}
-			else {
-				Console.out("No render mode specified, using " + Config.renderer + ".");
-			}
-			
+												
 			if(cmd.hasOption("width")) {
 				String option = cmd.getOptionValue("width");
 				
@@ -126,10 +97,105 @@ public class Main
 			if(cmd.hasOption("resizable")) {
 				Config.windowResizable = true;
 			}
+			
+			if(cmd.hasOption("audiosource")) {
+				if(cmd.getOptionValue("audiosource").equals(Config.AUDIO_SOURCE_FIFO)) {
+					Config.audioSource = Config.AUDIO_SOURCE_FIFO;
+				}
+				else if(cmd.getOptionValue("audiosource").equals(Config.AUDIO_SOURCE_SOCKET)) {
+					Config.audioSource = Config.AUDIO_SOURCE_SOCKET;
+				}
+				else {
+					Console.error("Invalid audio source specified.");
+				}
+			}
+			else {
+				Console.out("No audio source specified, using " + Config.audioSource + ".");
+			}
+			
+			if(cmd.hasOption("sampleformat")) {
+				if(cmd.getOptionValue("sampleformat").equals(Config.SAMPLE_FORMAT_INT8)) {
+					Config.sampleFormat = Config.SAMPLE_FORMAT_INT8;
+				}
+				else if(cmd.getOptionValue("sampleformat").equals(Config.SAMPLE_FORMAT_FLOAT)) {
+					Config.sampleFormat = Config.SAMPLE_FORMAT_FLOAT;
+				}
+				else {
+					Console.error("Invalid sample format specified.");
+				}
+			}
+			else {
+				Console.out("No sample format specified, using " + Config.sampleFormat + ".");
+			}
+			
+			if(cmd.hasOption("samplesize")) {
+				try {
+					int sampleSize = Integer.parseInt(cmd.getOptionValue("samplesize"));
+					
+					if(sampleSize == 512 || sampleSize == 1024 || sampleSize == 2048) {
+						Config.sampleSize = sampleSize;
+					}
+					else {
+						Console.error("Invalid sample size specified.");
+					}
+				}
+				catch (NumberFormatException e) {
+					Console.error("Error while parsing command line arguments: samplesize is not a valid integer.");
+				}
+			}
+			else {
+				Console.out("No sample size specified, using " + Config.sampleSize + ".");
+			}
+			
+			if(cmd.hasOption("byteorder")) {
+				if(cmd.getOptionValue("byteorder").equals(Config.BYTE_ORDER_LE)) {
+					Config.byteOrder = ByteOrder.LITTLE_ENDIAN;
+				}
+				else if(cmd.getOptionValue("byteorder").equals(Config.BYTE_ORDER_BE)) {
+					Config.byteOrder = ByteOrder.BIG_ENDIAN;
+				}
+				else {
+					Console.error("Invalid byte order specified.");
+				}
+			}
+			else {
+				Console.out("No byte order specified, using " + Config.BYTE_ORDER_LE + ".");
+			}
+			
+			if(Config.audioSource.equals(Config.AUDIO_SOURCE_FIFO)) {
+				if(cmd.hasOption("path")) {
+					if(! (new File(cmd.getOptionValue("path"))).canRead()) {
+						Console.error("Unable to read the specified FIFO, aborting.");
+						return;
+					}
+					
+					Config.fifoPath = cmd.getOptionValue("path");
+				}
+				else {
+					Console.error("No fifo path specified, aborting.");
+					return;
+				}
+			}
+			
+			if(Config.audioSource.equals(Config.AUDIO_SOURCE_SOCKET)) {
+				if(cmd.hasOption("port")) {
+					try {
+						Config.socketPort = Integer.parseInt(cmd.getOptionValue("port"));
+					}
+					catch(NumberFormatException e) {
+						Console.error("Error while parsing command line arguments: port is not a valid integer.");
+					}
+				}
+				else {
+					Console.out("No port specified, using " + Config.socketPort + ".");
+				}
+			}
 		}
 		catch (ParseException e) {
 			Console.error("Error while parsing command line arguments: " + e.getMessage());
 			new HelpFormatter().printHelp("pav", options);
 		}
+		
+		PApplet.main(new String[] { "pav.PAV" });
 	}
 }

@@ -22,7 +22,6 @@ package pav;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.concurrent.BlockingDeque;
@@ -30,8 +29,6 @@ import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.TimeUnit;
 import pav.audiosource.AudioCallback;
 import pav.audiosource.AudioSource;
-import pav.audiosource.MPDAudioSource;
-import pav.audiosource.SocketAudioSource;
 import pav.configurator.Configurator;
 import pav.configurator.ConfiguratorFactory;
 import pav.lib.PAVException;
@@ -64,7 +61,7 @@ public class PAV extends PApplet implements AudioCallback
 	
 	private StringBuilder _inputBuffer;
 	private Visualization _visualization;
-	private AudioSource _audioSource;
+	private final AudioSource _audioSource;
 	private volatile String[] _audioSourceInfo;
 	
 	private PFont _statusFont;
@@ -81,9 +78,9 @@ public class PAV extends PApplet implements AudioCallback
 	/**
 	 * Ctor.
 	 * 
-	 * @throws IOException If an error occured while initializing the ControlStream.
+	 * @throws PAVException If an error occured while initializing the audio source
 	 */
-	public PAV()
+	public PAV() throws PAVException
 	{
 		_drawStatus = true;
 		_inputBuffer = new StringBuilder();
@@ -92,6 +89,7 @@ public class PAV extends PApplet implements AudioCallback
 		_configurators.add(ConfiguratorFactory.generic());
 		_sampleQueue = new LinkedBlockingDeque<float[]>();
 		_audioSourceInfo = new String[0];
+		_audioSource = AudioSource.factory(this);
 	}
 
 	/**
@@ -136,18 +134,7 @@ public class PAV extends PApplet implements AudioCallback
 			catch(PAVException e) { }
 		}
 		
-		try {
-			if(Config.audioSource.equals(Config.AUDIO_SOURCE_SOCKET)) {
-				_audioSource = new SocketAudioSource(this);
-			}
-			else {
-				_audioSource = new MPDAudioSource(this);
-			}
-		}
-		catch(Exception e) {
-			Console.error("Error while initializing audio source:");
-			Console.error(e);
-		}
+		_audioSource.read();
 	}
 
 	/**

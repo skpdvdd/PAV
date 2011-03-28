@@ -19,43 +19,39 @@
 
 package pav.audiosource;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import pav.Config;
+
 /**
- * Audio Callback used by audio sources.
+ * FIFO-based audio source.
  * 
  * @author christopher
  */
-public interface AudioCallback
+public class FIFOAudioSource extends AudioSource
 {
-	/**
-	 * Called on new audio frames.
-	 * 
-	 * @param frame The frame. Must not be null
-	 */
-	void onNewFrame(float[] frame);
+	private final AudioStream _stream;
 	
 	/**
-	 * Called on song changes.
-	 */
-	void onSongChanged();
-	
-	/**
-	 * Called on sample rate changes.
+	 * Ctor.
 	 * 
-	 * @param sampleRate The new sample rate.
+	 * @param callback The callback. Must not be null
+	 * @throws FileNotFoundException If the fifo does not exist
 	 */
-	void onSampleRateChanged(int sampleRate);
+	public FIFOAudioSource(AudioCallback callback) throws FileNotFoundException
+	{
+		_stream = new AudioStream(new FileInputStream(Config.fifoPath), callback);
+	}
 	
-	/**
-	 * Called on status changes.
-	 * 
-	 * @param status Status info
-	 */
-	void onStatusChanged(String[] status);
+	@Override
+	public void read()
+	{
+		_stream.read();
+	}
 	
-	/**
-	 * Called on errors.
-	 * 
-	 * @param error The error
-	 */
-	void onError(Throwable error);
+	@Override
+	public void close() throws InterruptedException
+	{
+		_stream.close();
+	}
 }

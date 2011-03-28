@@ -1,14 +1,27 @@
+
+/*
+ * Processing Audio Visualization (PAV)
+ * Copyright (C) 2011  Christopher Pramerdorfer
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package pav.audiosource;
 
-import java.io.BufferedReader;
-import java.io.DataInputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.nio.ByteBuffer;
-import java.nio.FloatBuffer;
 import pav.Config;
 
 /**
@@ -16,18 +29,12 @@ import pav.Config;
  * 
  * @author christopher
  */
-public class SocketAudioSource implements AudioSource
+public class SocketAudioSource extends AudioSource implements Runnable
 {
 	private final Thread _thread;
 	private final ServerSocket _serverSocket;
 	private final AudioCallback _callback;
-
-	private Socket _socket;
-	private DataStream _dataStream;
-	private Thread _dataStreamThread;
-	private PrintWriter _out;
-	private BufferedReader _in;
-	private volatile boolean _done;
+	private AudioStream _stream;
 	
 	/**
 	 * Ctor.
@@ -38,183 +45,55 @@ public class SocketAudioSource implements AudioSource
 	public SocketAudioSource(AudioCallback callback) throws IOException
 	{
 		_callback = callback;
-		_callback.onSampleRateChanged(44100);
-		_callback.onStatusChanged(new String[] { "No client connection." });
-		
-		_serverSocket = new ServerSocket(Config.SocketAudioSource.port, 0);
-				
+		_serverSocket = new ServerSocket(Config.socketPort, 0);		
 		_thread = new Thread(this, "SocketAudioSource");
+	}
+	
+	@Override
+	public void read()
+	{
 		_thread.start();
 	}
 
 	@Override
 	public void run()
 	{
-		while(! _done) {
+		while(! Thread.interrupted()) {
+			_callback.onStatusChanged(new String[] { "No client connection." });
+			
 			try {
-				_socket = _serverSocket.accept();
-				_out = new PrintWriter(_socket.getOutputStream(), true);
-				_in = new BufferedReader(new InputStreamReader(_socket.getInputStream()));
-
-				_dataStream = new DataStream();
-				_dataStreamThread = new Thread(_dataStream, "SocketAudioSource DataStream");
-				_dataStreamThread.start();
-				_out.println("!ok " + _dataStream.getLocalPort());
-				
+				Socket socket = _serverSocket.accept();
+				_stream = new AudioStream(socket.getInputStream(), _callback);
+				_stream.read();
 				_callback.onStatusChanged(new String[0]);
-
-				String line = null;
-
-				while((line = _in.readLine()) != null) {
-					String[] in = line.split(" ");
-
-					if(in[0].equals("!close")) {
-						break;
-					}
-
-					if(in[0].equals("!sr")) {
-						try {
-							_callback.onSampleRateChanged(Integer.parseInt(in[1]));
-						}
-						catch (Exception e) {
-							_out.println("!err");
-						}
-					}
-				}
+				_stream.waitUntilFinished();
 			}
 			catch (IOException e) {
-				if(! _done) {
-					_callback.onError(e);
-				}
+				_callback.onError(e);
 			}
+			catch(InterruptedException e) { }
 			finally {
-				_closeAll();
-				_callback.onStatusChanged(new String[] { "No client connection." });
+				System.out.println("in finally");
+				try { _stream.close(); } catch(InterruptedException e) { e.printStackTrace(); }
 			}
 		}
 
-		try {
-			_serverSocket.close();
-		}
-		catch (IOException e) { }
+		try { _serverSocket.close(); } catch (IOException e) { }
 	}
 
 	@Override
 	public void close() throws InterruptedException
 	{
-		_done = true;
-		_closeAll();
-		_thread.join(250);
-	}
-	
-	private void _closeAll()
-	{
-		if(_dataStream != null) {
-			_dataStream.close();
-		}
-
-		if(_out != null) {
-			_out.println("!close");
-			_out.close();
-		}
-
-		if(_in != null) try { _in.close(); } catch (IOException e) { }
-		if(_socket != null) try { _socket.close(); } catch (IOException e) { }
-	}
-	
-	/**
-	 * Represents a data stream from the client.
-	 * 
-	 * @author christopher
-	 */
-	private class DataStream implements Runnable
-	{
-		private Socket _socket;
-		private volatile boolean _done;
-		private final ServerSocket _serverSocket;
-
-		/**
-		 * Ctor.
-		 * 
-		 * Creates a new ServerSocket that listens to any free port.
-		 * 
-		 * @throws IOException If an error occured while initializing the ServerSocket
-		 */
-		public DataStream() throws IOException
-		{
-			_serverSocket = new ServerSocket(0, 0);
-		}
-
-		/**
-		 * Returns the port the ServerSocket listens to.
-		 * 
-		 * @return The port
-		 */
-		public int getLocalPort()
-		{
-			return _serverSocket.getLocalPort();
-		}
-
-		@Override
-		public void run()
-		{
-			DataInputStream in = null;
-			FloatBuffer frameBuffer = null;
-			byte[] byteIn = new byte[0];
-			float[] frame = new float[0];
-			
-			try {
-				_socket = _serverSocket.accept();
-				in = new DataInputStream(_socket.getInputStream());
-
-				while(! _done) {
-					int frameLen = in.readInt();
-					int frameLenBytes = frameLen * 4;
-					
-					if(byteIn.length != frameLenBytes) {
-						byteIn = new byte[frameLenBytes];
-						frameBuffer = ByteBuffer.wrap(byteIn).asFloatBuffer();
-						frame = new float[frameLen];
-					}
-					
-					in.readFully(byteIn);
-					
-					frameBuffer.clear();
-					frameBuffer.get(frame, 0, frameLen);
-					
-					_callback.onNewFrame(frame);
-				}
-			}
-			catch (Exception e) {
-				if(! _done) {
-					_callback.onError(e);
-				}
-			}
-			finally {
-				if(in != null) {
-					try {
-						in.close();
-					}
-					catch(IOException e) { }
-				}
-				
-				_closeAll();
-			}
-		}
-
-		/**
-		 * Closes the connection.
-		 */
-		public void close()
-		{
-			_done = true;
-			_closeAll();
-		}
+		_thread.interrupt();
 		
-		private void _closeAll()
-		{
-			try { _serverSocket.close(); } catch (IOException e) { }
-			if(_socket != null) try { _socket.close(); } catch (IOException e) { }
-		}
+		try { _closeAll(); } catch(IOException e) { e.printStackTrace(); }
+		
+		_thread.join(125);
+	}
+	
+	private void _closeAll() throws InterruptedException, IOException
+	{
+		_serverSocket.close();
+		_stream.close();
 	}
 }
