@@ -34,18 +34,6 @@ public interface AudioCallback
 	void onNewFrame(float[] frame);
 	
 	/**
-	 * Called on song changes.
-	 */
-	void onSongChanged();
-	
-	/**
-	 * Called on sample rate changes.
-	 * 
-	 * @param sampleRate The new sample rate.
-	 */
-	void onSampleRateChanged(int sampleRate);
-	
-	/**
 	 * Called on status changes.
 	 * 
 	 * @param status Status info

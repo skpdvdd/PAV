@@ -125,7 +125,7 @@ public class PAV extends PApplet implements AudioCallback
 		});
 		
 		_visualization = new VisualizationImpl(this);
-		_visualization.setSampleRate(44100);
+		_visualization.setSampleRate(Config.sampleRate);
 		
 		if(g instanceof GLGraphics) {
 			try {
@@ -215,8 +215,14 @@ public class PAV extends PApplet implements AudioCallback
 		
 		if(keyCode == 38) {
 			if(! _inputHistory.isEmpty()) {
-				_inputHistoryPosition = (_inputHistoryPosition == 0) ? _inputHistory.size() - 1 : _inputHistoryPosition - 1;
-				_inputBuffer = new StringBuilder(_inputHistory.get(_inputHistoryPosition));
+				if(_inputHistoryPosition == -1) {
+					_inputHistoryPosition = _inputHistory.size() - 1;
+					_inputBuffer = new StringBuilder(_inputHistory.get(_inputHistoryPosition));
+				}
+				else if(_inputHistoryPosition > 0) {
+					_inputHistoryPosition--;
+					_inputBuffer = new StringBuilder(_inputHistory.get(_inputHistoryPosition));
+				}
 			}
 			
 			return;
@@ -224,9 +230,10 @@ public class PAV extends PApplet implements AudioCallback
 		
 		if(keyCode == 40) {
 			if(! _inputHistory.isEmpty()) {
-				if(_inputHistoryPosition == _inputHistory.size() - 1) {
-					_inputHistoryPosition = 0;
+				if (_inputHistoryPosition == -1) { }
+				else if(_inputHistoryPosition == _inputHistory.size() - 1) {
 					_inputBuffer = new StringBuilder();
+					_inputHistoryPosition = -1;
 				}
 				else {
 					_inputHistoryPosition++;
@@ -265,7 +272,7 @@ public class PAV extends PApplet implements AudioCallback
 		
 		if(valid) {
 			_inputHistory.add(_inputBuffer.toString());
-			_inputHistoryPosition = 0;
+			_inputHistoryPosition = -1;
 		}
 		
 		_inputBuffer = new StringBuilder();
@@ -275,18 +282,6 @@ public class PAV extends PApplet implements AudioCallback
 	public void onNewFrame(float[] frame)
 	{
 		_sampleQueue.add(frame);
-	}
-
-	@Override
-	public void onSongChanged()
-	{
-		//TODO implement
-	}
-	
-	@Override
-	public void onSampleRateChanged(int sampleRate)
-	{
-		_visualization.setSampleRate(sampleRate);
 	}
 
 	@Override

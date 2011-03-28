@@ -23,15 +23,12 @@ import java.awt.FileDialog;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
-import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.net.Socket;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.nio.FloatBuffer;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -422,8 +419,7 @@ public class Player extends PApplet
 		_listener = new MusicListener();
 		_player.addListener(_listener);
 
-		_playing = id;		
-		_pavControl.onPlaybackStarted();
+		_playing = id;
 	}
 	
 	private void _setSongPath(File path)
@@ -600,60 +596,59 @@ public class Player extends PApplet
 	 */
 	private class PAVControl implements Runnable
 	{
-		private Socket _data;
-		private DataOutputStream _dataOut;
-		private boolean _active;
-
+		private volatile boolean _active;
+		
 		@Override
 		public void run()
 		{
 			if(! Config.usePav) {
 				return;
 			}
-									
-			try {
-				_data = new Socket(InetAddress.getByName(Config.pavHost), Config.pavPort);
-				_dataOut = new DataOutputStream(_data.getOutputStream());
-				_active = true;
-			}
-			catch (Exception e) {
-				Console.error("An error occurred while trying to connect to PAV:");
-				Console.error(e);
-				return;
-			}
 			
-			byte[] bb = new byte[Config.frameSize * 4];
-			ByteBuffer bbuf = ByteBuffer.wrap(bb);
-			bbuf.order(ByteOrder.LITTLE_ENDIAN);
-			FloatBuffer fbuf = bbuf.asFloatBuffer();
+			_active = true;
+			
+			DatagramSocket socket = null;
 			
 			try {
-				while(! Thread.interrupted()) {					
+				int fs = Config.frameSize;
+				int fs2 = Config.frameSize * 2;
+				
+				int smax = Short.MAX_VALUE;
+				byte[] bb = new byte[fs2];
+				InetAddress address = InetAddress.getByName(Config.pavHost);
+				socket = new DatagramSocket();
+				DatagramPacket packet = new DatagramPacket(bb, fs2, address, Config.pavPort);
+				
+				while(! Thread.interrupted()) {
+					int bi = 0;
 					float[] frame = _sampleQueue.takeLast();
 
 					if(_sampleQueue.remainingCapacity() == 1) {
 						_sampleQueue.clear();
+						Console.out("Dropped frames.");
 					}
-
-					fbuf.clear();
-					fbuf.put(frame);
-
-					_dataOut.write(bb);
-					_dataOut.flush();
+					
+					for(int i = 0; i < fs; i++) {
+						short s = (short) (frame[i] * smax);
+						
+						bb[bi] = (byte) (s & 0xFF);
+						bb[bi + 1] = (byte)((s >> 8) & 0xFF);
+						
+						bi += 2;
+					}
+					
+					socket.send(packet);
 				}
 			}
-			catch (InterruptedException e) { }
-			catch (IOException e) {
-				Console.error("An error occured while sending data to PAV ... stopping PAV support.");
+			catch(IOException e) {
+				Console.error("An error occured while sending data to PAV, disabling PAV support.");
+				Console.error(e);
 			}
+			catch(InterruptedException e) { }
 			finally {
 				_active = false;
 				
-				try {
-					_dataOut.close();
-					_data.close();
-				}
-				catch(IOException e) { }
+				if(socket != null) socket.close();
 			}
 		}
 		
@@ -666,11 +661,6 @@ public class Player extends PApplet
 		{
 			return _active;
 		}
-		
-		/**
-		 * Event handler - Audio playback started.
-		 */
-		public void onPlaybackStarted() { }
 	}
 	
 	/**

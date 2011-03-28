@@ -162,7 +162,10 @@ public class VisualizationImpl implements Visualization
 	public void removeVisualizerAt(int level)
 	{
 		Visualizer remove = _visualizers.remove(level);
-		remove.dispose();
+		
+		if(remove != null) {
+			remove.dispose();
+		}
 		
 		String key = null;
 			

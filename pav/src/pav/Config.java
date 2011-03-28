@@ -37,17 +37,7 @@ public final class Config
 	/**
 	 * Use socket audio source.
 	 */
-	public static final String AUDIO_SOURCE_SOCKET = "socket";
-	
-	/**
-	 * Samples are in int8 (2 bytes, java short) format.
-	 */
-	public static final String SAMPLE_FORMAT_INT8 = "int8";
-	
-	/**
-	 * Samples are in normalized float (4 bytes, -1 to 1) format.
-	 */
-	public static final String SAMPLE_FORMAT_FLOAT = "float";
+	public static final String AUDIO_SOURCE_UDP = "udp";
 	
 	/**
 	 * Audio data are transfered as little-endian byte stream.
@@ -62,17 +52,17 @@ public final class Config
 	/**
 	 * The audio source to use.
 	 */
-	public static String audioSource = AUDIO_SOURCE_SOCKET;
+	public static String audioSource = AUDIO_SOURCE_UDP;
 	
 	/**
-	 * The sample format.
-	 */
-	public static String sampleFormat = SAMPLE_FORMAT_FLOAT;
-	
-	/**
-	 * The sample size;
+	 * The sample size. Must be 512, 1024 or 2048.
 	 */
 	public static int sampleSize = 1024;
+	
+	/**
+	 * The sample rate.
+	 */
+	public static int sampleRate = 44100;
 	
 	/**
 	 * The byte order.
@@ -80,9 +70,9 @@ public final class Config
 	public static ByteOrder byteOrder = ByteOrder.LITTLE_ENDIAN;
 	
 	/**
-	 * The port the socket audio source should listen to.
+	 * The port the udp audio source should listen to.
 	 */
-	public static int socketPort = 2198;
+	public static int udpPort = 2198;
 	
 	/**
 	 * The path to the fifo the fifo audio source should use.

@@ -24,7 +24,7 @@ import java.io.FileNotFoundException;
 import pav.Config;
 
 /**
- * FIFO-based audio source.
+ * FIFO audio source.
  * 
  * @author christopher
  */

@@ -23,7 +23,6 @@ import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
-import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
 import pav.Config;
 
@@ -37,6 +36,7 @@ public class AudioStream implements Runnable
 	private final Thread _thread;
 	private final DataInputStream _is;
 	private final AudioCallback _callback;
+	private boolean _closed;
 	
 	/**
 	 * Ctor.
@@ -60,29 +60,35 @@ public class AudioStream implements Runnable
 		_thread.start();
 	}
 	
-	/**
-	 * Pauses the current thread until the audio stream is finished.
-	 * 
-	 * @throws InterruptedException If the thread was interrupted while waiting for the stream to finish
-	 */
-	public void waitUntilFinished() throws InterruptedException
-	{
-		_thread.join();
-	}
-	
 	@Override
 	public void run()
 	{		
 		try {
-			if(Config.sampleFormat.equals(Config.SAMPLE_FORMAT_INT8)) {
-				_processingShort();
-			}
-			else if(Config.sampleFormat.equals(Config.SAMPLE_FORMAT_FLOAT)) {
-				_processFloat();
+			int ss = Config.sampleSize;
+			short[] sb = new short[ss];
+			byte[] bb = new byte[ss * 2];
+			float[] frame = new float[ss];
+			float normalize = (float) Short.MAX_VALUE;
+
+			ByteBuffer bbuf = ByteBuffer.wrap(bb);
+			bbuf.order(Config.byteOrder);		
+			ShortBuffer sbuf = bbuf.asShortBuffer();		
+
+			while(! Thread.interrupted()) {
+				_is.readFully(bb);
+				
+				sbuf.clear();
+				sbuf.get(sb);
+				
+				for(int i = 0; i < ss; i++) {
+					frame[i] = sb[i] / normalize;
+				}
+					
+				_callback.onNewFrame(frame);
 			}
 		}
 		catch(IOException e) {
-			_callback.onError(e);
+			if(! _closed) _callback.onError(e);
 		}
 		finally {
 			try { _is.close(); } catch(IOException e) { }
@@ -96,53 +102,11 @@ public class AudioStream implements Runnable
 	 */
 	public void close() throws InterruptedException
 	{
+		_closed = true;
+		
+		try { _is.close(); } catch(IOException e) { }
+		
 		_thread.interrupt();
 		_thread.join(250);
-	}
-	
-	private void _processFloat() throws IOException
-	{
-		int ss = Config.sampleSize;
-		byte[] bb = new byte[ss * 4];
-		float[] frame = new float[ss];
-
-		ByteBuffer bbuf = ByteBuffer.wrap(bb);
-		bbuf.order(Config.byteOrder);		
-		FloatBuffer fbuf = bbuf.asFloatBuffer();		
-
-		while(! Thread.interrupted()) {
-			_is.readFully(bb);
-			
-			fbuf.clear();
-			fbuf.get(frame);
-			
-			_callback.onNewFrame(frame);
-		}
-	}
-	
-	private void _processingShort() throws IOException
-	{
-		int ss = Config.sampleSize;
-		short[] sb = new short[ss];
-		byte[] bb = new byte[ss * 2];
-		float[] frame = new float[ss];
-		float normalize = (float) Short.MAX_VALUE;
-
-		ByteBuffer bbuf = ByteBuffer.wrap(bb);
-		bbuf.order(Config.byteOrder);		
-		ShortBuffer sbuf = bbuf.asShortBuffer();		
-
-		while(! Thread.interrupted()) {
-			_is.readFully(bb);
-			
-			sbuf.clear();
-			sbuf.get(sb);
-			
-			for(int i = 0; i < ss; i++) {
-				frame[i] = sb[i] / normalize;
-			}
-				
-			_callback.onNewFrame(frame);
-		}
 	}
 }

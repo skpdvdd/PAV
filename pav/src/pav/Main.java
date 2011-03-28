@@ -44,15 +44,15 @@ public class Main
 		options.addOption("renderer", true, "The Processing render mode to use.");
 		options.addOption("width", true, "The width of the visualization window.");
 		options.addOption("height", true, "The height of the visualization window.");
-		options.addOption("resizable", false, "Whether the visualization window is resizable.");
+		options.addOption("resizable", false, "Make the visualization window resizable.");
 		
-		options.addOption("audiosource", true, "Audio source to use (socket or fifo).");
-		options.addOption("sampleformat", true, "Sample format (int8 or float).");
+		options.addOption("audiosource", true, "Audio source to use (udp or fifo).");
 		options.addOption("samplesize", true, "Number of samples per frame (512, 1024 or 2048)");
+		options.addOption("samplerate", true, "The sample rate of the audio data.");
 		options.addOption("byteorder", true, "Byte order of the samples (le or be)");
 		
 		options.addOption("path", true, "Path to the fifo the fifo audio source should use.");
-		options.addOption("port", true, "Port the socket audio source should listen to.");
+		options.addOption("port", true, "Port the udp audio source should listen to.");
 		
 		CommandLineParser parser = new GnuParser();
 		
@@ -102,8 +102,8 @@ public class Main
 				if(cmd.getOptionValue("audiosource").equals(Config.AUDIO_SOURCE_FIFO)) {
 					Config.audioSource = Config.AUDIO_SOURCE_FIFO;
 				}
-				else if(cmd.getOptionValue("audiosource").equals(Config.AUDIO_SOURCE_SOCKET)) {
-					Config.audioSource = Config.AUDIO_SOURCE_SOCKET;
+				else if(cmd.getOptionValue("audiosource").equals(Config.AUDIO_SOURCE_UDP)) {
+					Config.audioSource = Config.AUDIO_SOURCE_UDP;
 				}
 				else {
 					Console.error("Invalid audio source specified.");
@@ -111,21 +111,6 @@ public class Main
 			}
 			else {
 				Console.out("No audio source specified, using " + Config.audioSource + ".");
-			}
-			
-			if(cmd.hasOption("sampleformat")) {
-				if(cmd.getOptionValue("sampleformat").equals(Config.SAMPLE_FORMAT_INT8)) {
-					Config.sampleFormat = Config.SAMPLE_FORMAT_INT8;
-				}
-				else if(cmd.getOptionValue("sampleformat").equals(Config.SAMPLE_FORMAT_FLOAT)) {
-					Config.sampleFormat = Config.SAMPLE_FORMAT_FLOAT;
-				}
-				else {
-					Console.error("Invalid sample format specified.");
-				}
-			}
-			else {
-				Console.out("No sample format specified, using " + Config.sampleFormat + ".");
 			}
 			
 			if(cmd.hasOption("samplesize")) {
@@ -145,6 +130,18 @@ public class Main
 			}
 			else {
 				Console.out("No sample size specified, using " + Config.sampleSize + ".");
+			}
+			
+			if(cmd.hasOption("samplerate")) {
+				try {
+					Config.sampleRate = Integer.parseInt(cmd.getOptionValue("samplerate"));
+				}
+				catch (NumberFormatException e) {
+					Console.error("Error while parsing command line arguments: samplerate is not a valid integer.");
+				}
+			}
+			else {
+				Console.out("No sample rate specified, using " + Config.sampleRate + ".");
 			}
 			
 			if(cmd.hasOption("byteorder")) {
@@ -177,17 +174,17 @@ public class Main
 				}
 			}
 			
-			if(Config.audioSource.equals(Config.AUDIO_SOURCE_SOCKET)) {
+			if(Config.audioSource.equals(Config.AUDIO_SOURCE_UDP)) {
 				if(cmd.hasOption("port")) {
 					try {
-						Config.socketPort = Integer.parseInt(cmd.getOptionValue("port"));
+						Config.udpPort = Integer.parseInt(cmd.getOptionValue("port"));
 					}
 					catch(NumberFormatException e) {
 						Console.error("Error while parsing command line arguments: port is not a valid integer.");
 					}
 				}
 				else {
-					Console.out("No port specified, using " + Config.socketPort + ".");
+					Console.out("No port specified, using " + Config.udpPort + ".");
 				}
 			}
 		}

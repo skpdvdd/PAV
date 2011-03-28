@@ -42,8 +42,8 @@ public abstract class AudioSource
 			if(Config.audioSource.equals(Config.AUDIO_SOURCE_FIFO)) {
 				return new FIFOAudioSource(callback);
 			}
-			else if(Config.audioSource.equals(Config.AUDIO_SOURCE_SOCKET)) {
-				return new SocketAudioSource(callback);
+			else if(Config.audioSource.equals(Config.AUDIO_SOURCE_UDP)) {
+				return new UDPAudioSource(callback);
 			}
 			else {
 				throw new PAVException("Invalid audio source specified.");

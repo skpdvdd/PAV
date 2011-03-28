@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<project name="pav" basedir="." default="run-sw">
+<project name="pav" basedir="." default="run">
 	<property name="src.dir" value="src"/>
 	<property name="build.dir" value="build"/>
 	<property name="lib.dir" value="lib"/>
@@ -27,17 +27,13 @@
 		<jar destfile="${jar.dir}/${ant.project.name}.jar" basedir="${classes.dir}"/>
     </target>
     
-    <target name="run-sw" depends="jar">
+    <target name="run" depends="jar">
     	<java fork="true" classname="${main-class}">
     		<classpath>
     			<path refid="classpath"/>
     			<path location="${jar.dir}/${ant.project.name}.jar"/>
     		</classpath>
-			<arg value="-port=2198"/> <!-- the port to listen to -->
-    		<arg value="-renderer=processing.core.PGraphics2D"/> <!-- render mode -->
-    		<arg value="-width=800"/> <!-- visualization width -->
-    		<arg value="-height=600"/> <!-- visualization height -->
-    		<arg value="-resizable"/> <!-- frame resizable -->
+			<!-- see readme.txt for a listing of arguments -->
     	</java>
     </target>
 	
@@ -48,7 +44,22 @@
     			<path refid="classpath"/>
     			<path location="${jar.dir}/${ant.project.name}.jar"/>
     		</classpath>
-    		<arg value="-renderer=codeanticode.glgraphics.GLGraphics"/> <!-- render mode -->
+    		<arg value="-renderer=codeanticode.glgraphics.GLGraphics"/>
+    		<!-- see readme.txt for a listing of arguments -->
     	</java>
     </target>
+	
+	<target name="run-fifo" depends="jar">
+    	<java fork="true" classname="${main-class}">
+    		<sysproperty key="java.library.path" path="${java.lib.dir}"/>
+    		<classpath>
+    			<path refid="classpath"/>
+    			<path location="${jar.dir}/${ant.project.name}.jar"/>
+    		</classpath>
+    		<arg value="-renderer=codeanticode.glgraphics.GLGraphics"/>
+    		<arg value="-audiosource=fifo"/>
+    		<arg value="-path=/tmp/mpd.fifo"/> <!-- change this to match the path to your fifo -->
+    		<!-- see readme.txt for a listing of arguments -->
+    	</java>
+	</target>
 </project>
