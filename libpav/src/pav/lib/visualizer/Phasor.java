@@ -49,8 +49,9 @@ public class Phasor extends VisualizerAbstract
 	
 	private static final long serialVersionUID = 4412875346457402076L;
 	
-	private transient float _vMin, _vMax, _dMin, _dMax;
 	private int _mode;
+	private float _strokeWeight;
+	private transient float _vMin, _vMax, _dMin, _dMax;
 	
 	/**
 	 * Ctor.
@@ -63,12 +64,15 @@ public class Phasor extends VisualizerAbstract
 		_dMax = Float.MIN_VALUE;
 		
 		setMode(MODE_CURVES);
+		setStrokeWeight(1);
 		setColor(0xFFFF0000, 0xFFFFFF00, PApplet.RGB);
 	}
 
 	@Override
 	public void process() throws PAVException
 	{
+		p.strokeWeight(_strokeWeight);
+		
 		float[] frame = Frame.samples();
 		int len = frame.length;
 		int len1 = len - 1;
@@ -104,8 +108,7 @@ public class Phasor extends VisualizerAbstract
 		float height2 = (area[3] - area[1]) / 2f;
 		
 		cm.setRange(0, len - 1);
-		p.strokeWeight(1);
-		
+
 		if(_mode != MODE_DOTS) {
 			p.noFill();
 			p.beginShape();
@@ -115,8 +118,8 @@ public class Phasor extends VisualizerAbstract
 			float x = frameDeriv[i];
 			float y = frame[i];
 			
-			x = (x < 0) ? PApplet.map(x, _dMin, 0, width2 * -1, 0) : PApplet.map(x, 0, _dMax, 0, width2);
-			y = (y < 0) ? PApplet.map(y, _vMin, 0, height2, 0) : PApplet.map(y, 0, _vMax, 0, height2 * -1);
+			x = (x < 0) ? PApplet.map(x, _dMin, 0, - width2, 0) : PApplet.map(x, 0, _dMax, 0, width2);
+			y = (y < 0) ? PApplet.map(y, _vMin, 0, height2, 0) : PApplet.map(y, 0, _vMax, 0, - height2);
 			
 			p.stroke(cm.map(i));
 			
@@ -145,6 +148,16 @@ public class Phasor extends VisualizerAbstract
 	public void setMode(int mode)
 	{
 		_mode = mode;
+	}
+	
+	/**
+	 * Sets the stroke weight to use when drawing.
+	 * 
+	 * @param weight The stroke weight. Must be > 0
+	 */
+	public void setStrokeWeight(float weight)
+	{
+		_strokeWeight = weight;
 	}
 	
 	@Override

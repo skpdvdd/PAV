@@ -50,6 +50,10 @@ public class Spectrum extends ConfiguratorAbstract
 			return _processFreq((pav.lib.visualizer.Spectrum) subject, Util.removeFirst(q));
 		}
 		
+		if(q[0].equals("sw")) {
+			return _processStrokeWeight((pav.lib.visualizer.Spectrum) subject, Util.removeFirst(q));
+		}
+		
 		return false;
 	}
 	
@@ -93,5 +97,21 @@ public class Spectrum extends ConfiguratorAbstract
 		}
 		
 		return false;
+	}
+	
+	private boolean _processStrokeWeight(pav.lib.visualizer.Spectrum subject, String[] query)
+	{
+		try {
+			float sw = Float.parseFloat(query[0]);
+			if(sw > 0) {
+				subject.setStrokeWeight(sw);
+				return true;
+			}
+			
+			return false;
+		}
+		catch(NumberFormatException e) {
+			return false;
+		}
 	}
 }

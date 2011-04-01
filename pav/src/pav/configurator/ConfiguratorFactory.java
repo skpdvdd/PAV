@@ -35,6 +35,7 @@ public class ConfiguratorFactory
 	private static Phasor _phasor;
 	private static Boxes _boxes;
 	private static Bubbles _bubbles;
+	private static Wavering _wavering;
 	
 	/**
 	 * Returns the generic configurator.
@@ -160,6 +161,20 @@ public class ConfiguratorFactory
 		}
 		
 		return _bubbles;
+	}
+	
+	/**
+	 * Returns the wavering configurator.
+	 * 
+	 * @return Wavering configurator
+	 */
+	public static Wavering wavering()
+	{
+		if(_wavering == null) {
+			_wavering = new Wavering();
+		}
+		
+		return _wavering;
 	}
 	
 	private ConfiguratorFactory() { }

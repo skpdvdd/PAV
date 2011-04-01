@@ -46,8 +46,9 @@ public class Waveform extends VisualizerAbstract
 	 * Draw a shape.
 	 */
 	public static final int MODE_SHAPE = 3;
-		
+	
 	private int _mode;
+	private float _strokeWeight;
 	private boolean _colorAbsolute;
 	
 	/**
@@ -57,13 +58,14 @@ public class Waveform extends VisualizerAbstract
 	{
 		setMode(MODE_BINS);
 		colorAbsolute(true);
+		setStrokeWeight(1);
 		setColor(0xFFFF0000, 0xFFFFFF00, PApplet.RGB);
 	}
-	
+
 	@Override
 	public void process() throws PAVException
 	{
-		p.strokeWeight(1);
+		p.strokeWeight(_strokeWeight);
 				
 		float[] frame = Frame.samples();
 		float[] area = getArea();
@@ -130,6 +132,16 @@ public class Waveform extends VisualizerAbstract
 			_colorAbsolute = false;
 			cm.setRange(-1, 1);
 		}
+	}
+	
+	/**
+	 * Sets the stroke weight to use when drawing.
+	 * 
+	 * @param weight The stroke weight. Must be > 0
+	 */
+	public void setStrokeWeight(float weight)
+	{
+		_strokeWeight = weight;
 	}
 	
 	@Override

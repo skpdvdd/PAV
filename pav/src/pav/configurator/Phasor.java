@@ -46,6 +46,10 @@ public class Phasor extends ConfiguratorAbstract
 			return _processMode((pav.lib.visualizer.Phasor) subject, Util.removeFirst(q));
 		}
 		
+		else if(q[0].equals("sw")) {
+			return _processStrokeWeight((pav.lib.visualizer.Phasor) subject, Util.removeFirst(q));
+		}
+		
 		return false;
 	}
 	
@@ -65,5 +69,21 @@ public class Phasor extends ConfiguratorAbstract
 		}
 		
 		return true;
+	}
+	
+	private boolean _processStrokeWeight(pav.lib.visualizer.Phasor subject, String[] query)
+	{
+		try {
+			float sw = Float.parseFloat(query[0]);
+			if(sw > 0) {
+				subject.setStrokeWeight(sw);
+				return true;
+			}
+			
+			return false;
+		}
+		catch(NumberFormatException e) {
+			return false;
+		}
 	}
 }

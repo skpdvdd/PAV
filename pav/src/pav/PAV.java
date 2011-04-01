@@ -129,9 +129,11 @@ public class PAV extends PApplet implements AudioCallback
 			try {
 				ShaderManager.initialize(this);
 			}
-			catch(PAVException e) { }
+			catch(PAVException e) {
+				Console.error("Could not initialize shaders: " + e.getMessage());
+			}
 		}
-		
+
 		_audioSource.read();
 	}
 
@@ -392,6 +394,10 @@ public class PAV extends PApplet implements AudioCallback
 				_addVisualizer(new MelSpectrum(), level);
 				configurator = ConfiguratorFactory.melSpectrum();
 			}
+//			else if(name.equals("wavering")) {
+//				_addVisualizer(new Wavering(), level);
+//				configurator = ConfiguratorFactory.wavering();
+//			}
 			else {
 				return false;
 			}
@@ -449,7 +455,7 @@ public class PAV extends PApplet implements AudioCallback
 		if(subject == null) return false;
 		
 		query = query.substring(q[0].length() + 1);
-
+		
 		for(Configurator c : _configurators) {
 			if(c.process(subject, query) == true) {
 				return true;

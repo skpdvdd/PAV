@@ -50,8 +50,9 @@ public class Spectrum extends VisualizerAbstract
 	
 	private transient float _vMax;
 	
-	private boolean _rememberMax;
 	private int _mode;
+	private float _strokeWeight;
+	private boolean _rememberMax;
 	private Integer _minFrequency, _maxFrequency;
 	
 	/**
@@ -61,14 +62,15 @@ public class Spectrum extends VisualizerAbstract
 	{
 		rememberMax(true);
 		setMode(MODE_BINS);
-		setColor(new float[] { 0, 0.2f, 0.6f, 1 }, new int[] { 0xFF0000FF, 0xFF00FF00, 0xFFFFFF00, 0xFFFF0000 }, PApplet.RGB);
+		setStrokeWeight(1);
 		noCutoffFrequencies();
+		setColor(new float[] { 0, 0.2f, 0.6f, 1 }, new int[] { 0xFF0000FF, 0xFF00FF00, 0xFFFFFF00, 0xFFFF0000 }, PApplet.RGB);
 	}
 	
 	@Override
 	public void process() throws PAVException
 	{	
-		p.strokeWeight(1);
+		p.strokeWeight(_strokeWeight);
 		
 		float max;
 		int from, to;
@@ -143,6 +145,16 @@ public class Spectrum extends VisualizerAbstract
 		if(_mode == MODE_SHAPE) {
 			p.endShape();
 		}
+	}
+	
+	/**
+	 * Sets the stroke weight to use when drawing.
+	 * 
+	 * @param weight The stroke weight. Must be > 0
+	 */
+	public void setStrokeWeight(float weight)
+	{
+		_strokeWeight = weight;
 	}
 	
 	/**

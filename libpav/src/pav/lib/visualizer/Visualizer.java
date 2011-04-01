@@ -97,7 +97,7 @@ public interface Visualizer extends Serializable
 	
 	/**
 	 * Disposes this visualizer, releasing all resources that were used exclusively
-	 * by this visualiter. Subsequent calls to any methods of the visualizer might cause exceptions.
+	 * by this visualizer. Subsequent calls to any methods of the visualizer might cause exceptions.
 	 */
 	void dispose();
 }
