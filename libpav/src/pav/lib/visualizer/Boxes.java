@@ -373,7 +373,7 @@ public class Boxes extends VisualizerAbstract
 			break;
 		}
 	}
-
+	
 	@Override
 	public void process() throws PAVException
 	{
@@ -385,7 +385,7 @@ public class Boxes extends VisualizerAbstract
 			if(_buffer != null) {
 				_buffer.dispose();
 			}
-				
+			
 			_buffer = new GLGraphicsOffScreen(p, width, height, true);
 			resetCamera();
 		}

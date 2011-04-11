@@ -1,0 +1,10 @@
+<filter name="gaussian blur">
+    <description>3x3 Gaussian blur convolution filter</description>
+    <fragment>Blur.glsl</fragment>
+    <textures input="1" output="1">
+        <intexture type="sampler2d" name="tex" offset="offset" label="Input image">0</intexture>
+    </textures>
+    <parameters>
+        <parameter type="float" name="DarkenFactor" label="Darken factor. set to 0.0 to disable">0.0</parameter>
+    </parameters>
+</filter>

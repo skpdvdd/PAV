@@ -90,11 +90,6 @@ public final class Config
 	public static int windowHeight = 768;
 	
 	/**
-	 * Whether the display window is resizable.
-	 */
-	public static boolean windowResizable = false;
-	
-	/**
 	 * The renderer to use.
 	 */
 	public static String renderer = PConstants.P2D;

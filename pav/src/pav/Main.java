@@ -44,8 +44,7 @@ public class Main
 		options.addOption("renderer", true, "The Processing render mode to use.");
 		options.addOption("width", true, "The width of the visualization window.");
 		options.addOption("height", true, "The height of the visualization window.");
-		options.addOption("resizable", false, "Make the visualization window resizable.");
-		
+
 		options.addOption("audiosource", true, "Audio source to use (udp or fifo).");
 		options.addOption("samplesize", true, "Number of samples per frame (512, 1024 or 2048)");
 		options.addOption("samplerate", true, "The sample rate of the audio data.");
@@ -92,10 +91,6 @@ public class Main
 			}
 			else {
 				Console.out("No window height specified, using " + Config.windowHeight + ".");
-			}
-			
-			if(cmd.hasOption("resizable")) {
-				Config.windowResizable = true;
 			}
 			
 			if(cmd.hasOption("audiosource")) {

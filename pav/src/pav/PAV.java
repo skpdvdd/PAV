@@ -44,6 +44,7 @@ import pav.lib.visualizer.Spectogram;
 import pav.lib.visualizer.Spectrum;
 import pav.lib.visualizer.Visualizer;
 import pav.lib.visualizer.Waveform;
+import pav.lib.visualizer.Wavering;
 import processing.core.PApplet;
 import processing.core.PFont;
 import codeanticode.glgraphics.GLGraphics;
@@ -104,7 +105,6 @@ public class PAV extends PApplet implements AudioCallback
 		textFont(_statusFont);
 		textSize(12);
 
-		frame.setResizable(Config.windowResizable);
 		frame.setTitle("PAV");
 
 		WindowListener[] listeners = frame.getWindowListeners();
@@ -132,6 +132,9 @@ public class PAV extends PApplet implements AudioCallback
 			catch(PAVException e) {
 				Console.error("Could not initialize shaders: " + e.getMessage());
 			}
+		}
+		else {
+			frame.setResizable(true);
 		}
 
 		_audioSource.read();
@@ -394,10 +397,10 @@ public class PAV extends PApplet implements AudioCallback
 				_addVisualizer(new MelSpectrum(), level);
 				configurator = ConfiguratorFactory.melSpectrum();
 			}
-//			else if(name.equals("wavering")) {
-//				_addVisualizer(new Wavering(), level);
-//				configurator = ConfiguratorFactory.wavering();
-//			}
+			else if(name.equals("wavering")) {
+				_addVisualizer(new Wavering(), level);
+				configurator = ConfiguratorFactory.wavering();
+			}
 			else {
 				return false;
 			}

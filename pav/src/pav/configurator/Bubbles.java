@@ -93,7 +93,7 @@ public class Bubbles extends ConfiguratorAbstract
 	
 	private boolean _processRate(pav.lib.visualizer.Bubbles subject, String[] query)
 	{
-		float[] rate = Util.parseFloats(query);
+		float[] rate = Util.tryParseFloats(query);
 		
 		if(rate.length != 2 || rate[0] <= 0 || rate[0] > rate[1] || rate[1] > 5) return false;
 		

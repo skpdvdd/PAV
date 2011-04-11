@@ -1,0 +1,8 @@
+<filter name="Replace">
+    <description>Replace mix</description>
+    <fragment>Replace.glsl</fragment>
+    <textures input="2" output="1">
+        <intexture type="sampler2d" name="BaseImage" label="The old texture">0</intexture>
+        <intexture type="sampler2d" name="BlendImage" label="The new texture">1</intexture>                      
+    </textures>
+</filter>

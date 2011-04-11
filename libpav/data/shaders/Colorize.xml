@@ -1,0 +1,10 @@
+<filter name="Colorize">
+    <description>Sets the color of all non-black pixels in the texture to a given color</description>
+    <fragment>Colorize.glsl</fragment>
+    <textures input="1" output="1">
+        <intexture type="sampler2d" name="Texture" label="The texture to filter">0</intexture>                      
+    </textures>
+    <parameters>
+		<parameter type="vec4" name="Color" label="The color to use">1.0 1.0 1.0 1.0</parameter>
+    </parameters>
+</filter>

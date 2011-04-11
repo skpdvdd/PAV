@@ -19,6 +19,7 @@
 
 package pav.configurator;
 
+import pav.Util;
 import pav.lib.visualizer.Visualizer;
 
 /**
@@ -41,9 +42,198 @@ public class Wavering extends ConfiguratorAbstract
 			return false;
 		}
 		
-		//TODO
+		if(q[0].equals("radius")) {
+			return _processRadius((pav.lib.visualizer.Wavering) subject, Util.removeFirst(q));
+		}
+		
+		if(q[0].equals("displace")) {
+			return _processDisplace((pav.lib.visualizer.Wavering) subject, Util.removeFirst(q));
+		}
+		
+		if(q[0].equals("rcolor")) {
+			return _processRcolor((pav.lib.visualizer.Wavering) subject, Util.removeFirst(q));
+		}
+		
+		if(q[0].equals("darken")) {
+			return _processDarken((pav.lib.visualizer.Wavering) subject, Util.removeFirst(q));
+		}
+		
+		if(q[0].equals("brightthresh")) {
+			return _processBrightthresh((pav.lib.visualizer.Wavering) subject, Util.removeFirst(q));
+		}
+		
+		if(q[0].equals("bloomintensity")) {
+			return _processBloomintensity((pav.lib.visualizer.Wavering) subject, Util.removeFirst(q));
+		}
+		
+		if(q[0].equals("exposure")) {
+			return _processExposure((pav.lib.visualizer.Wavering) subject, Util.removeFirst(q));
+		}
+		
+		if(q[0].equals("maxbright")) {
+			return _processMaxbright((pav.lib.visualizer.Wavering) subject, Util.removeFirst(q));
+		}
 		
 		return false;
 	}
 
+	private boolean _processRadius(pav.lib.visualizer.Wavering subject, String[] query)
+	{
+		float[] radius = Util.tryParseFloats(query);
+		
+		switch(radius.length) {
+			case 1 :
+				if(radius[0] > 0) {
+					subject.setRadius(radius[0], radius[0]);
+					return true;
+				}
+				else {
+					return false;
+				}
+			case 2 :
+				if(radius[0] > 0 && radius[1] > 0) {
+					subject.setRadius(radius[0], radius[1]);
+					return true;
+				}
+				else {
+					return false;
+				}
+			default :
+				return false;
+		}
+	}
+	
+	private boolean _processDisplace(pav.lib.visualizer.Wavering subject, String[] query)
+	{
+		float[] displace = Util.tryParseFloats(query);
+		
+		switch(displace.length) {
+			case 1 :
+				if(displace[0] > 0) {
+					subject.setDisplacement(displace[0], displace[0]);
+					return true;
+				}
+				else {
+					return false;
+				}
+			case 2 :
+				if(displace[0] > 0 && displace[1] > 0) {
+					subject.setDisplacement(displace[0], displace[1]);
+					return true;
+				}
+				else {
+					return false;
+				}
+			default :
+				return false;
+		}
+	}
+	
+	private boolean _processRcolor(pav.lib.visualizer.Wavering subject, String[] query)
+	{
+		if(! (subject.getImplementation() instanceof pav.lib.visualizer.Wavering.Fancy)) {
+			return false;
+		}
+		
+		pav.lib.visualizer.Wavering.Fancy impl = (pav.lib.visualizer.Wavering.Fancy) subject.getImplementation();
+		
+		int[] color = Util.tryParseColors(query);
+		
+		if(color.length == 1) {
+			impl.setRingColor(color[0]);
+			return true;
+		}
+		
+		return false;
+	}
+	
+	private boolean _processDarken(pav.lib.visualizer.Wavering subject, String[] query)
+	{
+		if(! (subject.getImplementation() instanceof pav.lib.visualizer.Wavering.Fancy)) {
+			return false;
+		}
+		
+		pav.lib.visualizer.Wavering.Fancy impl = (pav.lib.visualizer.Wavering.Fancy) subject.getImplementation();
+		
+		float[] darken = Util.tryParseFloats(query);
+		
+		if(darken.length == 1 && darken[0] > 0 && darken[0] <= 1) {
+			impl.setDarkenFactor(darken[0]);
+			return true;
+		}
+		
+		return false;
+	}
+	
+	private boolean _processBrightthresh(pav.lib.visualizer.Wavering subject, String[] query)
+	{
+		if(! (subject.getImplementation() instanceof pav.lib.visualizer.Wavering.Fancy)) {
+			return false;
+		}
+		
+		pav.lib.visualizer.Wavering.Fancy impl = (pav.lib.visualizer.Wavering.Fancy) subject.getImplementation();
+
+		float[] brightthresh = Util.tryParseFloats(query);
+		
+		if(brightthresh.length == 1 && brightthresh[0] > 0 && brightthresh[0] < 1) {
+			impl.setBrightnessThreshold(brightthresh[0]);
+			return true;
+		}
+		
+		return false;		
+	}
+	
+	private boolean _processBloomintensity(pav.lib.visualizer.Wavering subject, String[] query)
+	{
+		if(! (subject.getImplementation() instanceof pav.lib.visualizer.Wavering.Fancy)) {
+			return false;
+		}
+		
+		pav.lib.visualizer.Wavering.Fancy impl = (pav.lib.visualizer.Wavering.Fancy) subject.getImplementation();
+		
+		float[] intensity = Util.tryParseFloats(query);
+		
+		if(intensity.length == 1 && intensity[0] >= 0) {
+			impl.setBloomIntensity(intensity[0]);
+			return true;
+		}
+		
+		return false;
+	}
+	
+	private boolean _processExposure(pav.lib.visualizer.Wavering subject, String[] query)
+	{
+		if(! (subject.getImplementation() instanceof pav.lib.visualizer.Wavering.Fancy)) {
+			return false;
+		}
+		
+		pav.lib.visualizer.Wavering.Fancy impl = (pav.lib.visualizer.Wavering.Fancy) subject.getImplementation();
+		
+		float[] exposure = Util.tryParseFloats(query);
+		
+		if(exposure.length == 1 && exposure[0] > 0) {
+			impl.setTonemapExposure(exposure[0]);
+			return true;
+		}
+		
+		return false;
+	}
+	
+	private boolean _processMaxbright(pav.lib.visualizer.Wavering subject, String[] query)
+	{
+		if(! (subject.getImplementation() instanceof pav.lib.visualizer.Wavering.Fancy)) {
+			return false;
+		}
+		
+		pav.lib.visualizer.Wavering.Fancy impl = (pav.lib.visualizer.Wavering.Fancy) subject.getImplementation();
+		
+		float[] maxbright = Util.tryParseFloats(query);
+		
+		if(maxbright.length == 1 && maxbright[0] > 0) {
+			impl.setTonemapMaxBrightness(maxbright[0]);
+			return true;
+		}
+		
+		return false;
+	}
 }
