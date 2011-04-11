@@ -35,6 +35,70 @@
 					<div class="desc">Sets the area of the display window that is available to the Visualizer. How this area is used depends on the Visualizer. All values are relative to the window size and must be between 0 and 1 (e.g. 0.5 means half of the window width/height). The origin of the coordinate system is at the top left.</div>
 				</div>
 				
+				<h3>Bubbles</h3>
+				
+				<div class="cmd">
+					<div class="syntax">bloom V</div>
+					<div class="desc">Whether to emphazise bright colors or not. V must be 0 or 1.</div>
+				</div>
+				
+				<div class="cmd">
+					<div class="syntax">size MIN MAX</div>
+					<div class="desc">Sets the minimum and maximum size of the bubbles. The sizes are relative to the display area width. MIN and MAX must be between 0 and 0.5.</div>
+				</div>
+				
+				<div class="cmd">
+					<div class="syntax">rate MIN MAX</div>
+					<div class="desc">Specifies the minimum and maximum rate at which bubbles are spawned. The values are per frame, i.e, a rate of 0.1 means that on average 1 bubble is spawned every 10 frames. MIN and MAX must be between 0 and 5.</div>
+				</div>
+				
+				<div class="cmd">
+					<div class="syntax">darken FACTOR</div>
+					<div class="desc">Sets the darken factor, that is how fast bubbles disappear. FACTOR must be positive, default is 12.</div>
+				</div>
+			
+				<h3>Wavering</h3>
+				
+				<div class="cmd">
+					<div class="syntax">radius RX [RY]</div>
+					<div class="desc">The radius of the ring. The values are relative to the display area width, i.e. 0.5 means 0.5 times the display area. If only RX is specified, that values is used for RY aswell.</div>
+				</div>
+				
+				<div class="cmd">
+					<div class="syntax">displace DX [DY]</div>
+					<div class="desc">The maximum displacement of the ring. The values are relative to the display area width, i.e. 0.5 means 0.5 times the display area. If only DX is specified, that values is used for DY aswell.</div>
+				</div>
+				
+				<div class="cmd">
+					<div class="syntax">rcolor COLOR</div>
+					<div class="desc">[OpenGL mode only] Sets the color of the ring. COLOR must be of the form RRGGBB or AARRGGBB.</div>
+				</div>
+				
+				<div class="cmd">
+					<div class="syntax">darken FACTOR</div>
+					<div class="desc">[OpenGL mode only] Sets the darken factor, that is how fast stuff disappears. Must be greater 0 and below 1. Default is 0.006.</div>
+				</div>
+				
+				<div class="cmd">
+					<div class="syntax">brightthresh VALUE</div>
+					<div class="desc">[OpenGL mode only] Sets the brightness threshold for the bloom effect, that is how bright a color must be in order to glow. Must be greater 0 and below 1. Default is 0.3.</div>
+				</div>
+				
+				<div class="cmd">
+					<div class="syntax">bloomintensity VALUE</div>
+					<div class="desc">[OpenGL mode only] Sets the intensity of the bloom (glow) effect. Must be >= 0.</div>
+				</div>
+				
+				<div class="cmd">
+					<div class="syntax">exposure VALUE</div>
+					<div class="desc">[OpenGL mode only] Sets the exposure to use for tone mapping. Must be > 0. Default is 1.6.</div>
+				</div>
+				
+				<div class="cmd">
+					<div class="syntax">maxbright VALUE</div>
+					<div class="desc">[OpenGL mode only] Sets the brightness maximum for tone mapping. Must be > 0. Default is 0.9.</div>
+				</div>
+				
 				<h3>Waveform</h3>
 				
 				<div class="cmd">
@@ -53,7 +117,7 @@
 					<div class="desc">Sets the frequency range to display. All values must be positive integers. If only F1 is set, it corresponds to the maximum frequency (all frequencies up to F1 are visualized). If F1 is 0, all frequencies are displayed (default). If F2 is set too, F1 and F2 specify the minimum/maximum frequency to display.</div>
 				</div>
 				
-				<h3>Spectrum</h3>
+				<h3>Spectogram</h3>
 				
 				<div class="cmd">
 					<div class="syntax">hightop V</div>
@@ -115,28 +179,6 @@
 				<div class="cmd">
 					<div class="syntax">maxheight HEIGHT</div>
 					<div class="desc">Specifies the maximum height of the boxes. Must be a positive integer.</div>
-				</div>
-				
-				<h3>Bubbles</h3>
-				
-				<div class="cmd">
-					<div class="syntax">bloom V</div>
-					<div class="desc">Whether to emphazise bright colors or not. V must be 0 or 1.</div>
-				</div>
-				
-				<div class="cmd">
-					<div class="syntax">size MIN MAX</div>
-					<div class="desc">Sets the minimum and maximum size of the bubbles. The sizes are relative to the display area width. MIN and MAX must be between 0 and 0.5.</div>
-				</div>
-				
-				<div class="cmd">
-					<div class="syntax">rate MIN MAX</div>
-					<div class="desc">Specifies the minimum and maximum rate at which bubbles are spawned. The values are per frame, i.e, a rate of 0.1 means that on average 1 bubble is spawned every 10 frames. MIN and MAX must be between 0 and 5.</div>
-				</div>
-				
-				<div class="cmd">
-					<div class="syntax">darken FACTOR</div>
-					<div class="desc">Sets the darken factor, that is how fast bubbles disappear. FACTOR must be positive, default is 12.</div>
 				</div>
 				
 				<div id="copyright">Processing Audio Visualization (PAV)<br> Copyright (C) 2011  Christopher Pramerdorfer</div>
