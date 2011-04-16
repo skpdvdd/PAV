@@ -9,7 +9,7 @@
 		<div id="main">
 			<div class="content" style="padding-top: 170px;">
 				<h1>Processing Audio Visualization (PAV) - Commands</h1>
-				<p>PAV allows you to change how music is visualized by adding, configuring, and removing Visualizers at runtime. You can issue commands to PAV by writing into the PAV window and hitting enter. What you write is displayed at the bottom right of the window (see image below). You can scroll through the command history by using the up- and down-arrow keys. Note that there are no error messages: if you enter a valid command, it is executed. If the command is invalid, nothing happens. This page lists all available commands.</p>
+				<p>PAV allows you to change how music is visualized by adding, configuring, and removing Visualizers at runtime. You can issue commands to PAV by writing into the PAV window and hitting enter. What you write is displayed at the bottom right of the window (see image below). You can scroll through the command history by using the up- and down-arrow keys. Note that there are no error messages: if you enter a valid command, it is executed. If the command is invalid, nothing happens. This page lists all available commands. (<a href="index.html">home</a>)</p>
 			</div>
 			<div class="fig">
 				<img src="img/pav2.png" />
@@ -59,6 +59,10 @@
 			
 				<h3>Wavering</h3>
 				
+				<div class="cmd">
+					<div class="syntax">sw VAL</div>
+					<div class="desc">Sets the stroke weight to use when drawing. VAL must be a parsable float > 0 (e.g. 1.5).</div>
+				</div>			
 				<div class="cmd">
 					<div class="syntax">radius RX [RY]</div>
 					<div class="desc">The radius of the ring. The values are relative to the display area width, i.e. 0.5 means 0.5 times the display area. If only RX is specified, that values is used for RY aswell.</div>
