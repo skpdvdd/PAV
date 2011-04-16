@@ -53,7 +53,7 @@ public class Wavering extends VisualizerAbstract
 		interpolate(200);
 		setStrokeWeight(2);
 		colorAbsolute(true);
-		setColor(0xFF51610D, 0xFF52A417, PApplet.RGB);
+		setColor(0xFF0077AA, 0xFFFFAA00, PApplet.RGB);
 	}
 	
 	@Override
@@ -271,7 +271,7 @@ public class Wavering extends VisualizerAbstract
 			_ftoneMap = ShaderManager.getTextureFilter("ToneMap");
 			
 			setRingColor(0xFFFFFFFF);
-			setDarkenFactor(0.006f);
+			setDarkenFactor(0.015f);
 			setBrightnessThreshold(0.3f);
 			setBloomIntensity(0.5f);
 			setTonemapExposure(1.6f);

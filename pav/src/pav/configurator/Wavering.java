@@ -42,6 +42,10 @@ public class Wavering extends ConfiguratorAbstract
 			return false;
 		}
 		
+		if(q[0].equals("sw")) {
+			return _processStrokeWeight((pav.lib.visualizer.Wavering) subject, Util.removeFirst(q));
+		}
+		
 		if(q[0].equals("radius")) {
 			return _processRadius((pav.lib.visualizer.Wavering) subject, Util.removeFirst(q));
 		}
@@ -75,6 +79,22 @@ public class Wavering extends ConfiguratorAbstract
 		}
 		
 		return false;
+	}
+
+	private boolean _processStrokeWeight(pav.lib.visualizer.Wavering subject, String[] query)
+	{
+		try {
+			float sw = Float.parseFloat(query[0]);
+			if(sw > 0) {
+				subject.setStrokeWeight(sw);
+				return true;
+			}
+			
+			return false;
+		}
+		catch(NumberFormatException e) {
+			return false;
+		}
 	}
 
 	private boolean _processRadius(pav.lib.visualizer.Wavering subject, String[] query)

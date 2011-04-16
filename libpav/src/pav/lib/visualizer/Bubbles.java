@@ -68,9 +68,9 @@ public class Bubbles extends VisualizerAbstract
 		_generator = new Intensity();
 		
 		useBloom(true);
-		setDarkenFactor(12);
+		setDarkenFactor(13);
 		setBubbleSize(0.02f, 0.06f);
-		setSpawnRate(0.3f, 1.5f);
+		setSpawnRate(0.3f, 1.6f);
 		setColor(new float[] { 0, 0.33f, 0.66f, 1 }, new int[] { 0xFF00FF00, 0xFFFFFF00, 0xFFFF0000, 0xFFFF00FF }, PApplet.RGB);
 	}
 	
